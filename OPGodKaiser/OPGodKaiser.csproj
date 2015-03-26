@@ -69,7 +69,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Champions\Thresh.cs" />
-    <Compile Include="Champions\ThreshBeta.cs" />
     <Compile Include="CommonData.cs" />
     <Compile Include="Champions\Vladimir.cs" />
     <Compile Include="Program.cs" />
