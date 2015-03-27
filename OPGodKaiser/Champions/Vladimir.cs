@@ -39,6 +39,13 @@ namespace OPGodKaiser.Champions
         
         private void LoadMenu()
         {
+            var key = new Menu("Key", "Key");
+            {
+                key.AddItem(new MenuItem("StackE", "Auto Stack E", true).SetValue(new KeyBind("J".ToCharArray()[0], KeyBindType.Press)));
+
+                config.AddSubMenu(key);
+            }
+
             var combomenu = new Menu("Combo", "Combo");
             {
                 combomenu.AddItem(new MenuItem("C-UseQ", "Use Q", true).SetValue(true));
@@ -52,7 +59,7 @@ namespace OPGodKaiser.Champions
                 //combomenu.AddItem(new MenuItem("minNoKillEnemies", "Min No. Of KS Enemies", true).SetValue(new Slider(2, 1, 5)));
                 config.AddSubMenu(combomenu);
             }
-
+            
             var harassmenu = new Menu("Harass", "Harass");
             {
                 harassmenu.AddItem(new MenuItem("H-UseQ", "Use Q", true).SetValue(true));
@@ -61,7 +68,7 @@ namespace OPGodKaiser.Champions
 
                 config.AddSubMenu(harassmenu);
             }
-
+            
             var farmmenu = new Menu("Farm", "Farm");
             {
                 farmmenu.AddItem(new MenuItem("LastHit Setting", "LastHit Setting", true));
