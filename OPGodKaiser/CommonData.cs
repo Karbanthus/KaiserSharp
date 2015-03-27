@@ -11,7 +11,12 @@ namespace OPGodKaiser
 {
     class CommonData
     {
-        protected static readonly Obj_AI_Hero Player = ObjectManager.Player;
+        //protected static readonly Obj_AI_Hero Player = ObjectManager.Player;
+        
+        protected Obj_AI_Hero Player
+        {
+            get { return ObjectManager.Player; }
+        }
 
         //Spells
         protected Spell Q;
@@ -86,7 +91,6 @@ namespace OPGodKaiser
                 key.AddItem(new MenuItem("LastHitKeyT", "LastHit (toggle)", true).SetValue(new KeyBind("U".ToCharArray()[0], KeyBindType.Toggle)));
                 key.AddItem(new MenuItem("LaneClearActive", "Lane Clear", true).SetValue(new KeyBind("C".ToCharArray()[0], KeyBindType.Press)));
                 key.AddItem(new MenuItem("LaneClearActiveT", "Lane Clear (toggle)", true).SetValue(new KeyBind("A".ToCharArray()[0], KeyBindType.Toggle)));
-                key.AddItem(new MenuItem("StackE", "StackE (toggle)", true).SetValue(new KeyBind("J".ToCharArray()[0], KeyBindType.Toggle)));
 
                 config.AddSubMenu(key);
             }
