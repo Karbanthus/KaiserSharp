@@ -10,7 +10,8 @@ using SharpDX;
 /* Version Histroy 
  * 1.0.0.0 : Initial release Prject
  * 1.0.1.0 : Add Champions Thresh , Vladmir 
- * 1.0.1.1 :Fixed Vladimir Menu problem , DebugChat Deledted
+ * 1.0.1.1 : Fixed Vladimir Menu problem , DebugChat Deledted (2015-03-29)
+ * 1.0.1.2 : Fixed Compile error (2015-03-29)
  */
 
 
