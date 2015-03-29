@@ -412,7 +412,7 @@ namespace OPGodKaiser.Champions
         {
             if (!config.Item("UseWGapCloser", true).GetValue<bool>())
                 return;
-            Game.PrintChat("anti debug");
+            //Game.PrintChat("anti debug");
             if (W.IsReady() && gapcloser.Sender.Distance(Player) < 300)
             {
                 W.Cast();
