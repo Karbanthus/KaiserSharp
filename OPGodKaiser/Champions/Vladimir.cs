@@ -39,13 +39,13 @@ namespace OPGodKaiser.Champions
         
         private void LoadMenu()
         {
-            var key = new Menu("Key", "Key");
+            var MiscKey = new Menu("MiscKey", "MiscKey");
             {
-                key.AddItem(new MenuItem("StackE", "Auto Stack E", true).SetValue(new KeyBind("J".ToCharArray()[0], KeyBindType.Press)));
+                MiscKey.AddItem(new MenuItem("StackE", "Auto Stack E", true).SetValue(new KeyBind("J".ToCharArray()[0], KeyBindType.Press)));
 
-                config.AddSubMenu(key);
+                config.AddSubMenu(MiscKey);
             }
-
+           
             var combomenu = new Menu("Combo", "Combo");
             {
                 combomenu.AddItem(new MenuItem("C-UseQ", "Use Q", true).SetValue(true));

@@ -13,7 +13,7 @@ namespace OPGodKaiser
     {
         //protected static readonly Obj_AI_Hero Player = ObjectManager.Player;
         
-        protected Obj_AI_Hero Player
+        public Obj_AI_Hero Player
         {
             get { return ObjectManager.Player; }
         }
@@ -33,7 +33,7 @@ namespace OPGodKaiser
         protected int[] QMana = { 0, 0, 0, 0, 0 };
         protected int[] WMana = { 0, 0, 0, 0, 0 };
         protected int[] EMana = { 0, 0, 0, 0, 0 };
-        protected int[] RMana = { 0, 0, 0 };
+        protected int[] RMana = { 0, 0, 0, 0, 0 };
 
         //Menu
         public static Menu config;
@@ -426,6 +426,40 @@ namespace OPGodKaiser
         protected double GetAlliesComboDmg(Obj_AI_Hero target, Obj_AI_Hero ally)
         {
             return ally.GetSpellDamage(target, SpellSlot.Q) + ally.GetSpellDamage(target, SpellSlot.W) + ally.GetSpellDamage(target, SpellSlot.E) + ally.GetSpellDamage(target, SpellSlot.R);
+        }
+
+        /// <summary>
+        ///     Mana Manager
+        /// </summary>
+        /// <returns></returns>
+
+        protected bool ManaManager()
+        {
+            var status = false;
+            if (!Player.IsDead)
+                return status;
+
+                // Special case 
+                if (Player.ChampionName == "Udyr")
+                {
+                    var totalmana = WMana[W.Level] * 2 + EMana[E.Level] * 2;
+                    float havemana = Player.Mana;
+                    if (havemana > totalmana)
+                    {
+                        status = true; 
+                    }
+                }
+                else
+                {
+                    var totalmana = QMana[Q.Level] + WMana[W.Level] + EMana[E.Level] + RMana[R.Level];
+                    float havemana = Player.Mana;
+
+                    if (havemana > totalmana)
+                    {
+                        status = true;
+                    }
+                }
+                return status;
         }
 
         /// <summary>
