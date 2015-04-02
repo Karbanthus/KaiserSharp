@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using LeagueSharp;
 using LeagueSharp.Common;
 using SharpDX;
+using Color = System.Drawing.Color;
 
 namespace OPGodKaiser
 {
@@ -45,6 +46,8 @@ namespace OPGodKaiser
         //OrbWalk
         protected static Orbwalking.Orbwalker Orbwalker;
 
+        //Vector2 waypoint;
+
         protected CommonData()
         {
             CommonMenu();
@@ -54,16 +57,28 @@ namespace OPGodKaiser
         private void InitPluginEvents()
         {
             Game.OnUpdate += OnUpdate;
+            Game.OnWndProc += Game_OnWndProc;
             Drawing.OnDraw += OnDraw;
+            Drawing.OnEndScene += Drawing_OnEndScene;
             Orbwalking.BeforeAttack += OnBeforeAttack;
             Orbwalking.AfterAttack += OnAfterAttack;
             AntiGapcloser.OnEnemyGapcloser += OnEnemyGapcloser;
             Interrupter2.OnInterruptableTarget += OnPossibleToInterrupt;
             Obj_AI_Base.OnProcessSpellCast +=Obj_AI_Base_OnProcessSpellCast;
             Obj_AI_Hero.OnPlayAnimation += Obj_AI_Hero_OnPlayAnimation;
+            Obj_AI_Base.OnIssueOrder += Obj_AI_Base_OnIssueOrder;
             
             //Game.OnGameSendPacket += OnSendPacket;
             //Game.OnGameProcessPacket += OnProcessPacket;
+        }
+
+        protected virtual void SpecialMenu()
+        {
+            var SpecialMenu = new Menu("Kaiser's Special Ability", "Kaiser");
+
+            SpecialMenu.AddItem(new MenuItem("WaypointActive", "Draw Enemy Waypoints").SetValue(true));
+
+            config.AddSubMenu(SpecialMenu);
         }
 
         protected void CommonMenu()
@@ -95,6 +110,8 @@ namespace OPGodKaiser
                 config.AddSubMenu(key);
             }
 
+            SpecialMenu();
+
             config.AddToMainMenu();
         }
 
@@ -105,7 +122,7 @@ namespace OPGodKaiser
             var GetPredict = spell.GetPrediction(target, _aoe);
             HitChance hitchance = GetPredict.Hitchance;
             bool result = false;
-
+            
             //aoe
             var aoetarget = GetPredict.AoeTargetsHit;
             var AoetargetCount = GetPredict.AoeTargetsHitCount;
@@ -143,7 +160,7 @@ namespace OPGodKaiser
                         {
                             if (_collision)
                             {
-                                if (collision && hitchance >= HitChance.High)
+                                if (!collision && hitchance >= HitChance.High)
                                 {
                                     result = true;
                                 }
@@ -164,7 +181,7 @@ namespace OPGodKaiser
                                 {
                                     if (_collision)
                                     {
-                                        if (collision && hitchance >= HitChance.High && AoetargetCount >= requireHitCount)
+                                        if (!collision && hitchance >= HitChance.High && AoetargetCount >= requireHitCount)
                                         {
                                             result = true;
                                         }
@@ -193,7 +210,7 @@ namespace OPGodKaiser
                         {
                             if (_collision)
                             {
-                                if (collision && hitchance >= HitChance.High)
+                                if (!collision && hitchance >= HitChance.High)
                                 {
                                     result = true;
                                 }
@@ -210,7 +227,7 @@ namespace OPGodKaiser
                         {
                             if (_collision)
                             {
-                                if (collision && hitchance >= HitChance.High)
+                                if (!collision && hitchance >= HitChance.High)
                                 {
                                     result = true;
                                 }
@@ -232,7 +249,7 @@ namespace OPGodKaiser
         protected Vector3 GetPredictedPos(Obj_AI_Hero target, float _range,float _speed, float _delay, float _width)
         {
             // dek prediction  
-            // lots bugs
+            // lots bugs about get distance
             if (isValidTarget(target))
             {
                 float range = _range;
@@ -256,13 +273,13 @@ namespace OPGodKaiser
                 }
 
                 //Vector3 predictPos;
-                var targetPos1 = target.Position;
-                var targetPos2 = target.Position;
+                var targetPos1 = new Vector3(target.Position.X,target.Position.Y,target.Position.Z);
+                var targetPos2 = new Vector3(target.Position.X, target.Position.Y, target.Position.Z);
                 var canmoveDistance = target.MoveSpeed * Time;
                 var dba = canmoveDistance;
                 //Vector3 _ca;
-                Vector3 aca;
-                var waypoints = target.GetWaypoints();
+                //Vector3 aca;
+                List<Vector2> waypoints = target.GetWaypoints();
 
                 if (target.IsMoving)
                 {
@@ -273,55 +290,56 @@ namespace OPGodKaiser
 
                     if (DashingStatus)
                     {
-                        Game.PrintChat("Debug : Dashing Pred");
+                        //Game.PrintChat("Debug : Dashing Pred");
                         var DashingDistance = DashingSpeed * Time;
-                        targetPos2 = DashingEndPos;
+                        targetPos2 = new Vector3(DashingEndPos.X, DashingEndPos.Y, DashingEndPos.Z);
                         predictPos = targetPos1 + targetPos2 - targetPos1.Normalized() * DashingDistance;
-                        if (Geometry.Distance(predictPos, target.Position) > Geometry.Distance(DashingEndPos, target.Position))
+                        if (target.Distance(predictPos) > target.Distance(DashingEndPos))
                         {
-                            predictPos = DashingEndPos;
+                            predictPos = new Vector3(DashingEndPos.X, DashingEndPos.Y, DashingEndPos.Z);
                         }
                     }
                     else
                     {
-                        foreach (Vector2 a in waypoints)
+                        for (int i = 0; i < waypoints.Count -1; i++)
                         {
-                            _ca = a.To3D();
-                            if(_ca.IsValid())
+                            _ca = waypoints[i].To3D();
+                            if (_ca.IsValid())
                             {
                                 //aca = aca || _ca;
-                                var DashingDistance = Geometry.Distance(_ca, target.Position);
+                                var DashingDistance = target.Distance(_ca);
+                                
                                 dba = dba - DashingDistance;
                                 if (dba <= 0)
                                 {
-                                    targetPos2 = _ca;
+                                    targetPos2 = new Vector3(_ca.X, _ca.Y, _ca.Z);
                                     predictPos = targetPos1 + targetPos2 - targetPos1.Normalized() * canmoveDistance;
-                                    Game.PrintChat("Debug : Normal Pred");
+                                    //Game.PrintChat("Debug : Normal Pred");
                                     break;
                                 }
                             }
                         }
                         if (dba > 0 && _ca.IsValid())
                         {
-                            var DashingDistance = Geometry.Distance(_ca, target.Position);
+                            var DashingDistance = target.Distance(_ca);
                             var acc = dba - DashingDistance;
                             if (width >= acc)
                             {
-                                targetPos2 = _ca;
+                                targetPos2 = new Vector3(_ca.X, _ca.Y, _ca.Z);
                                 predictPos = targetPos1 + targetPos2 - targetPos1.Normalized() * canmoveDistance;
-                                Game.PrintChat("Debug : width Pred");
+                                //Game.PrintChat("Debug : width Pred");
                             }
                             else
                             {
                                 predictPos = targetPos1 + targetPos2 - targetPos1.Normalized() * canmoveDistance;
-                                Game.PrintChat("Debug : other Pred");
+                                //Game.PrintChat("Debug : other Pred");
                             }
                         }
                     }
                 }
                 else
                 {
-                    Game.PrintChat("Debug : Not moving Pred");
+                    //Game.PrintChat("Debug : Not moving Pred");
                     predictPos = targetPos1;
                 }
                 if (predictPos.IsValid())
@@ -331,11 +349,11 @@ namespace OPGodKaiser
                         return predictPos;
                     }
                 }
-                return predictPos;
+                return predictPos = new Vector3(0, 0, 0);
             }
             else
             {
-                return predictPos;
+                return predictPos = new Vector3(0,0,0);
             }
             //return predictPos;
         }
@@ -346,10 +364,20 @@ namespace OPGodKaiser
         /// <param name="hero"></param>
         /// <returns></returns>
         /// 
-        protected Obj_AI_Hero GetTarget(Spell _spell,TargetSelector.DamageType _DamageType)
+        protected Obj_AI_Hero GetTarget(Spell _spell, TargetSelector.DamageType _DamageType, bool IsCharge = false)
         {
-            var a = TargetSelector.GetTarget(_spell.Range, _DamageType);
-            return a;
+            if (IsCharge)
+            {
+                var a = TargetSelector.GetTarget(_spell.ChargedMaxRange, _DamageType);
+                return a;
+            }
+            else if (!IsCharge)
+            {
+                var a = TargetSelector.GetTarget(_spell.Range, _DamageType);
+                return a;
+            }
+            else
+                return null;
         }
 
         protected static bool isValidTarget(Obj_AI_Hero hero)
@@ -463,6 +491,26 @@ namespace OPGodKaiser
         }
 
         /// <summary>
+        ///     Drwaing
+        /// </summary>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <param name="size"></param>
+        /// <param name="thickness"></param>
+        /// <param name="color"></param>
+        
+        private void DrawCross(float x, float y, float size, float thickness, Color color)
+        {
+            var topLeft = new Vector2(x - 10 * size, y - 10 * size);
+            var topRight = new Vector2(x + 10 * size, y - 10 * size);
+            var botLeft = new Vector2(x - 10 * size, y + 10 * size);
+            var botRight = new Vector2(x + 10 * size, y + 10 * size);
+
+            Drawing.DrawLine(topLeft.X, topLeft.Y, botRight.X, botRight.Y, thickness, color);
+            Drawing.DrawLine(topRight.X, topRight.Y, botLeft.X, botLeft.Y, thickness, color);
+        }
+
+        /// <summary>
         ///     Virtual Processes
         /// </summary>
         /// <param name="args"></param>
@@ -489,6 +537,7 @@ namespace OPGodKaiser
 
         protected virtual void OnUpdate(EventArgs args)
         {
+            
         }
 
         protected virtual void OnBeforeAttack(Orbwalking.BeforeAttackEventArgs args)
@@ -498,16 +547,72 @@ namespace OPGodKaiser
         protected virtual void OnAfterAttack(AttackableUnit unit, AttackableUnit target)
         {
         }
-
+        //base
         protected virtual void OnLoad(EventArgs args)
         {
         }
-
+        //base
         protected virtual void OnDraw(EventArgs args)
         {
+            if (config.Item("WaypointActive").GetValue<bool>())
+            {
+                foreach (Obj_AI_Hero enemy in ObjectManager.Get<Obj_AI_Hero>())
+                {
+                    if (enemy.IsEnemy && !enemy.IsDead && enemy.IsValid && enemy.IsVisible)
+                    {
+                        List<Vector2> waypoints = enemy.GetWaypoints();
+
+                        Vector2 waypoint = Drawing.WorldToScreen(waypoints[0].To3D());
+                        Vector2 waypoint2 = Drawing.WorldToScreen(waypoints[waypoints.Count - 1].To3D());
+
+                        if (waypoint2.IsValid())
+                        {
+                            Drawing.DrawLine(waypoint[0], waypoint[1], waypoint2[0], waypoint2[1], 3, System.Drawing.Color.IndianRed);
+                        }
+                        
+                        if (waypoints.Count > 1)
+                        {
+                            DrawCross(waypoint2[0], waypoint2[1], 1.0f, 3.0f, System.Drawing.Color.Yellow);
+                            Drawing.DrawText(waypoint2[0], waypoint2[1], System.Drawing.Color.FromArgb(255, 255, 255, 255), enemy.ChampionName);
+                        }
+                    }
+                }
+            }
+        }
+        
+        protected virtual void Drawing_OnEndScene(EventArgs args)
+        {
+            if (config.Item("WaypointActive").GetValue<bool>())
+            {
+                foreach (Obj_AI_Hero enemy in ObjectManager.Get<Obj_AI_Hero>())
+                {
+                    if (enemy.IsEnemy && !enemy.IsDead && enemy.IsValid && enemy.IsVisible)
+                    {
+                        List<Vector2> waypoints = enemy.GetWaypoints();
+
+                        Vector2 waypoint = Drawing.WorldToMinimap(waypoints[0].To3D());
+                        Vector2 waypoint2 = Drawing.WorldToMinimap(waypoints[waypoints.Count - 1].To3D());
+
+                        if (waypoint2.IsValid())
+                        {
+                            Drawing.DrawLine(waypoint[0], waypoint[1], waypoint2[0], waypoint2[1], 2, System.Drawing.Color.Red);
+                        }
+                    }
+                }
+            }
         }
 
         protected virtual void Obj_AI_Hero_OnPlayAnimation(Obj_AI_Base sender, GameObjectPlayAnimationEventArgs args)
+        {
+            
+        }
+
+        protected virtual void Obj_AI_Base_OnIssueOrder(Obj_AI_Base sender, GameObjectIssueOrderEventArgs args)
+        {
+            
+        }
+
+        protected virtual void Game_OnWndProc(WndEventArgs args)
         {
             
         }

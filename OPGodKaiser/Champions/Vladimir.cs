@@ -41,7 +41,7 @@ namespace OPGodKaiser.Champions
         {
             var MiscKey = new Menu("MiscKey", "MiscKey");
             {
-                MiscKey.AddItem(new MenuItem("StackE", "Auto Stack E", true).SetValue(new KeyBind("J".ToCharArray()[0], KeyBindType.Press)));
+                MiscKey.AddItem(new MenuItem("_StackE", "Auto Stack E (toggle)", true).SetValue(new KeyBind("J".ToCharArray()[0], KeyBindType.Toggle)));
 
                 config.AddSubMenu(MiscKey);
             }
@@ -147,7 +147,7 @@ namespace OPGodKaiser.Champions
             var useW = config.Item("C-UseW", true).GetValue<bool>();
             var useE = config.Item("C-UseE", true).GetValue<bool>();
             var useR = config.Item("C-UseR", true).GetValue<bool>();
-            
+            UltCheck();
             if (useR && R.IsReady())
             {
                 UltCheck();
@@ -366,7 +366,7 @@ namespace OPGodKaiser.Champions
             }
 
             //Auto Stack E
-            if (config.Item("StackE", true).GetValue<KeyBind>().Active && !Player.IsRecalling())
+            if (config.Item("_StackE", true).GetValue<KeyBind>().Active && !Player.IsRecalling())
             {
                 AutoEStack();
             }
@@ -421,6 +421,8 @@ namespace OPGodKaiser.Champions
 
         protected override void OnDraw(EventArgs args)
         {
+            base.OnDraw(args);
+
             var QCircle = config.Item("Qcircle").GetValue<Circle>();
             var ECircle = config.Item("Ecircle").GetValue<Circle>();
             var RCircle = config.Item("Rcircle").GetValue<Circle>();
@@ -439,6 +441,11 @@ namespace OPGodKaiser.Champions
             {
                 Render.Circle.DrawCircle(ObjectManager.Player.Position, R.Range, RCircle.Color);
             }
+        }
+
+        protected override void Drawing_OnEndScene(EventArgs args)
+        {
+            base.Drawing_OnEndScene(args);
         }
         /*
         public struct AntiSpell
