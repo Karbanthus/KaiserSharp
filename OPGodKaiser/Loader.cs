@@ -13,6 +13,8 @@ namespace OPGodKaiser
                 case "vladimir":
                     new Champions.Vladimir();
                     break;
+                    //develop envirment
+                    /*
                 case "udyr":
                     new Champions.Udyr();
                     break;
@@ -24,7 +26,7 @@ namespace OPGodKaiser
                     break;
                 case "ezreal":
                     new Champions.Ezreal();
-                    break;
+                    break;*/
             }
         }
     }
