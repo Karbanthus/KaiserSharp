@@ -40,7 +40,7 @@ namespace OPGodKaiser
         public static Menu config;
 
         //predict
-        Vector3 predictPos;
+        Vector3 predictPos = new Vector3(0,0,0);
         Vector3 _ca;
 
         //OrbWalk
@@ -67,7 +67,9 @@ namespace OPGodKaiser
             Obj_AI_Base.OnProcessSpellCast +=Obj_AI_Base_OnProcessSpellCast;
             Obj_AI_Hero.OnPlayAnimation += Obj_AI_Hero_OnPlayAnimation;
             Obj_AI_Base.OnIssueOrder += Obj_AI_Base_OnIssueOrder;
-            
+            Obj_AI_Base.OnCreate += Obj_AI_Base_OnCreate;
+            Obj_AI_Base.OnDelete += Obj_AI_Base_OnDelete;
+
             //Game.OnGameSendPacket += OnSendPacket;
             //Game.OnGameProcessPacket += OnProcessPacket;
         }
@@ -358,6 +360,69 @@ namespace OPGodKaiser
             //return predictPos;
         }
 
+        protected Vector3 GetPredictedPos2(Obj_AI_Hero target, float _range, float _delay, float _width, float _speed = float.MaxValue)
+        {
+            predictPos = new Vector3(0, 0, 0);
+            float Time = 0;
+            if (_speed != float.MaxValue && _speed >0)
+            {
+                Time = Time + _delay;
+            }
+            else
+            {
+                Time = 0;
+            }
+
+            List<Vector2> waypoints = target.GetWaypoints();
+            if (target.IsMoving && waypoints.Count > 1)
+            {
+                for (int i = 0; i < waypoints.Count - 1; i++)
+                {
+                    var a = waypoints[i];
+                    var b = waypoints[i + 1];
+                    var UnitVector = (b - a).Normalized();
+                    
+                    for (int j = 0; j < 5; i++)
+                    {
+                        Time = Time + 0.1f;
+                        var dd = (a + UnitVector * target.MoveSpeed * Time).To3D();
+                        var ff = Time * _speed;
+
+                        if (Math.Abs(Player.Distance(dd) - ff) < 10)
+                        {
+                            //Game.PrintChat("compile");
+                            predictPos = dd;
+                            break;
+                        }
+                    }
+                    if (!predictPos.IsZero)
+                    {
+                        break;
+                    }
+                }
+            }
+            else
+            {
+                //Game.PrintChat("not moving");
+            }
+
+            if (!predictPos.IsZero)
+            {
+                if (_range >= Player.Distance(predictPos))
+                {
+                    return predictPos;
+                }
+                else
+                {
+                    return predictPos = new Vector3(0, 0, 0);
+                }
+            }
+            else
+            {
+                return predictPos = new Vector3(0, 0, 0);
+            }
+        }
+
         /// <summary>
         ///     Target Info
         /// </summary>
@@ -511,6 +576,15 @@ namespace OPGodKaiser
         }
 
         /// <summary>
+        ///     Debug
+        /// </summary>
+
+        protected void debug<T>(string sector, T str)
+        {
+            Game.PrintChat("Debug-{0} : {1}",sector ,str);
+        }
+
+        /// <summary>
         ///     Virtual Processes
         /// </summary>
         /// <param name="args"></param>
@@ -525,6 +599,7 @@ namespace OPGodKaiser
 
         protected virtual void Obj_AI_Base_OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
         {
+            
         }
 
         protected virtual void OnPossibleToInterrupt(Obj_AI_Hero sender, Interrupter2.InterruptableTargetEventArgs args)
@@ -613,6 +688,16 @@ namespace OPGodKaiser
         }
 
         protected virtual void Game_OnWndProc(WndEventArgs args)
+        {
+            
+        }
+
+        protected virtual void Obj_AI_Base_OnCreate(GameObject sender, EventArgs args)
+        {
+            
+        }
+
+        protected virtual void Obj_AI_Base_OnDelete(GameObject sender, EventArgs args)
         {
             
         }

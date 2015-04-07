@@ -300,7 +300,7 @@ namespace OPGodKaiser.Champions
                 var Rpredict = R.GetPrediction(enemyhero, true);
                 var min = config.Item("minNoEnemies", true).GetValue<Slider>().Value;
 
-                if (Rpredict.Hitchance >= HitChance.High && Rpredict.AoeTargetsHitCount >= min)
+                if (Rpredict.AoeTargetsHitCount >= min)
                 {
                     R.Cast(enemyhero);
                 }

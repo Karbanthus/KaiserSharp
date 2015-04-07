@@ -1,11 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using LeagueSharp;
 using LeagueSharp.Common;
-using SharpDX;
 
 /* Version Histroy 
  * 1.0.0.0 : Initial release Prject
@@ -13,6 +8,7 @@ using SharpDX;
  * 1.0.1.1 : Fixed Vladimir Menu problem , DebugChat Deledted (2015-03-29)
  * 1.0.1.2 : Fixed Compile error (2015-03-29)
  * 1.0.2.0 : Add enemies Waypoints && Fixed Vladimir : Auto Stack E,Ult (2015-04-02)
+ * 1.0.2.1 : Fixed Loader for L# sandbox
  */
 
 
@@ -33,7 +29,7 @@ namespace OPGodKaiser
 
                 if (type != null)
                 {
-                    Activator.CreateInstance(type);
+                    new Loader();
                     return;
                 }
                 Game.PrintChat(ObjectManager.Player.ChampionName + " not supported");

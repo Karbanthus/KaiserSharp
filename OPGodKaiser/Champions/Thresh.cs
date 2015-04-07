@@ -16,7 +16,6 @@ namespace OPGodKaiser.Champions
         Obj_AI_Hero catchedUnit = null;
         int qTimer;
         Vector3 __a;
-
         public Thresh()
         {
             LoadSpellData();
@@ -46,6 +45,7 @@ namespace OPGodKaiser.Champions
         {
             var combomenu = new Menu("Combo", "Combo");
             {
+                combomenu.AddItem(new MenuItem("Predict", "Set Predict", true).SetValue(new StringList(new[] { "LSharpPredict", "KaiserPredict"})));
                 combomenu.AddItem(new MenuItem("C-UseQ", "Use Q", true).SetValue(true));
                 combomenu.AddItem(new MenuItem("C-UseW", "Use W", true).SetValue(true));
                 combomenu.AddItem(new MenuItem("C-UseHW", "Use Hooeked W", true).SetValue(true));
@@ -110,12 +110,24 @@ namespace OPGodKaiser.Champions
                 {
                     CastQ(target);
                 }
+                KSCheck(target);
             }
         }
 
         private void Harass()
         {
-            
+            var target = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
+            if (config.Item("HarassActive", true).GetValue<KeyBind>().Active && target.IsValid && target != null)
+            {
+                if (config.Item("H-UseE", true).GetValue<bool>())
+                {
+                    CastE(target);
+                }
+                if (config.Item("H-UseQ", true).GetValue<bool>())
+                {
+                    CastQ(target);
+                }
+            }
         }
 
         private void KSCheck(Obj_AI_Hero target)
@@ -168,22 +180,32 @@ namespace OPGodKaiser.Champions
             {
                 if (!E.IsReady() || (E.IsReady() && E.Range < Player.Distance(target)))
                 {
-                    
-                    var b = Q.GetPrediction(target);
-                    if (b.Hitchance >= HitChance.High)
+                    var Mode = config.Item("Predict", true).GetValue<StringList>().SelectedIndex;
+
+                    switch(Mode)
                     {
-                        Q.Cast(target);
+                        case 0:
+                            var b = Q.GetPrediction(target);
+                            if (b.Hitchance >= HitChance.High)
+                            {
+                                Q.Cast(target);
+                            }
+                            break;
+                        case 1:
+                            var minionColl = Q.GetPrediction(target);
+                            if (minionColl.Hitchance != HitChance.Collision)
+                            {
+                                var PredictedPos = GetPredictedPos(target, Q.Range, Q.Speed, Q.Delay, Q.Width);
+                                //Game.PrintChat("debug : {0}", PredictedPos);
+                                //Game.PrintChat("debug : {0}", PredictedPos.IsZero);
+
+                                if (!PredictedPos.IsZero)
+                                {
+                                    Q.Cast(PredictedPos);
+                                }
+                            }
+                            break;
                     }
-                    /*
-                    var PredictedPos = GetPredictedPos(target, Q.Range, Q.Speed, Q.Delay, Q.Width);
-                    if (PredictedPos.IsValid())
-                    {
-                        var minionColl = Q.GetPrediction(target);
-                        if (minionColl.Hitchance >= HitChance.High)
-                        {
-                            Q.Cast(PredictedPos);
-                        }
-                    }*/
                 }
             }
             else if (Catched && Environment.TickCount > qTimer - 200 && CanActiveQ2() && CatchedQtarget.Type == target.Type)
@@ -206,8 +228,8 @@ namespace OPGodKaiser.Champions
                 bool CanHeSoonDead;
                 countAlliesNearTarget(CatchedQtarget, out NearAlliesCount, out CanHeSoonDead);
 
-                Game.PrintChat("Debug Enemies count : " + NearEnemiesCount);
-                Game.PrintChat("Debug Allies count : " + NearAlliesCount);
+                //Game.PrintChat("Debug Enemies count : " + NearEnemiesCount);
+                //Game.PrintChat("Debug Allies count : " + NearAlliesCount);
 
                 if (CanHeSoonDead)
                 {
@@ -272,6 +294,9 @@ namespace OPGodKaiser.Champions
 
         private void CastW(Obj_AI_Hero target)
         {
+            if (!W.IsReady() || target == null)
+                return;
+
 
         }
 
@@ -397,7 +422,7 @@ namespace OPGodKaiser.Champions
             else if (Catched) //Player.Distance(target) <= E.Range
             {
                 //var pos = target.Position.Extend(Player.Position, Player.Distance(target) + 200);
-                Game.PrintChat("catched");
+                //Game.PrintChat("catched");
                 if (Environment.TickCount > qTimer - 200 && Player.Distance(target) <= E.Range)
                 {
                     var pos = target.Position.Extend(Player.Position, Player.Distance(target) + 200);
@@ -447,7 +472,7 @@ namespace OPGodKaiser.Champions
             // Enemeis count in R range
             var hit = HeroManager.Enemies.Where(i => i.IsValidTarget(R.Range)).ToList();
             int count = hit.Count;
-
+            
             if (RequireCount <= count && R.IsReady())
             {
                 R.Cast();
@@ -508,7 +533,7 @@ namespace OPGodKaiser.Champions
 
         protected override void OnPossibleToInterrupt(Obj_AI_Hero sender, Interrupter2.InterruptableTargetEventArgs args)
         {
-            if (config.Item("UseEInterrupt").GetValue<bool>())
+            if (config.Item("UseEInterrupt", true).GetValue<bool>())
             {
                 if (Player.Distance(sender) < E.Range)
                 {
@@ -520,7 +545,7 @@ namespace OPGodKaiser.Champions
                 }
             }
 
-            if (config.Item("UseQInterrupt").GetValue<bool>())
+            if (config.Item("UseQInterrupt", true).GetValue<bool>())
             {
                 if (Player.Distance(sender) < Q.Range)
                 {
@@ -536,7 +561,7 @@ namespace OPGodKaiser.Champions
 
         protected override void OnEnemyGapcloser(ActiveGapcloser gapcloser)
         {
-            if (!config.Item("UseEGapCloser").GetValue<bool>())
+            if (!config.Item("UseEGapCloser", true).GetValue<bool>())
                 return;
 
             if (Player.Distance(gapcloser.Sender) < E.Range)
@@ -551,6 +576,7 @@ namespace OPGodKaiser.Champions
 
         protected override void OnDraw(EventArgs args)
         {
+            base.OnDraw(args);
             var QCircle = config.Item("Qcircle").GetValue<Circle>();
             var WCircle = config.Item("Wcircle").GetValue<Circle>();
             var ECircle = config.Item("Ecircle").GetValue<Circle>();
@@ -575,6 +601,11 @@ namespace OPGodKaiser.Champions
             {
                 Render.Circle.DrawCircle(ObjectManager.Player.Position, R.Range, RCircle.Color);
             }
+        }
+
+        protected override void Drawing_OnEndScene(EventArgs args)
+        {
+            base.Drawing_OnEndScene(args);
         }
 
         protected override void Obj_AI_Hero_OnPlayAnimation(Obj_AI_Base sender, GameObjectPlayAnimationEventArgs args)

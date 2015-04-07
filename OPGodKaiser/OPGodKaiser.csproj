@@ -83,8 +83,19 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Champions\Ezreal.cs" />
+    <Compile Include="Champions\Thresh.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Champions\Udyr.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Champions\Xerath.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="CommonData.cs" />
     <Compile Include="Champions\Vladimir.cs" />
+    <Compile Include="Loader.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
