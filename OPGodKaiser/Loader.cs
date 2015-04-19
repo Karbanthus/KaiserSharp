@@ -13,11 +13,10 @@ namespace OPGodKaiser
                 case "vladimir":
                     new Champions.Vladimir();
                     break;
-                    //develop envirment
-                    /*
                 case "udyr":
                     new Champions.Udyr();
                     break;
+                    /*
                 case "thresh":
                     new Champions.Thresh();
                     break;
@@ -26,7 +25,16 @@ namespace OPGodKaiser
                     break;
                 case "ezreal":
                     new Champions.Ezreal();
+                    break;
+                case "twistedfate":
+                    new Champions.TwistedFate();
+                    break;
+                case "orianna":
+                    new Champions.Orianna();
                     break;*/
+                case "nautilus":
+                    new Champions.Nautilus();
+                    break;
             }
         }
     }

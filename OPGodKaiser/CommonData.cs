@@ -69,6 +69,7 @@ namespace OPGodKaiser
             Obj_AI_Base.OnIssueOrder += Obj_AI_Base_OnIssueOrder;
             Obj_AI_Base.OnCreate += Obj_AI_Base_OnCreate;
             Obj_AI_Base.OnDelete += Obj_AI_Base_OnDelete;
+            Spellbook.OnCastSpell += Spellbook_OnCastSpell;
 
             //Game.OnGameSendPacket += OnSendPacket;
             //Game.OnGameProcessPacket += OnProcessPacket;
@@ -79,7 +80,8 @@ namespace OPGodKaiser
             var SpecialMenu = new Menu("Kaiser's Special Ability", "Kaiser");
 
             SpecialMenu.AddItem(new MenuItem("WaypointActive", "Draw Enemy Waypoints").SetValue(true));
-
+            SpecialMenu.AddItem(new MenuItem("debugM", "Develop Envirment-Debug Msg").SetValue(false));
+            
             config.AddSubMenu(SpecialMenu);
         }
 
@@ -116,6 +118,16 @@ namespace OPGodKaiser
 
             config.AddToMainMenu();
         }
+
+        /// <Prediction>
+        ///     Predict
+        /// </summary>
+        /// <param name="target"></param>
+        /// <param name="spell"></param>
+        /// <param name="_aoe"></param>
+        /// <param name="_collision"></param>
+        /// <param name="requireHitCount"></param>
+        /// <returns></returns>
 
         protected bool GetPredicted(Obj_AI_Hero target, Spell spell, bool _aoe, bool _collision, int requireHitCount = 1)
         {
@@ -247,188 +259,14 @@ namespace OPGodKaiser
             }
             return result;
         }
-        
-        protected Vector3 GetPredictedPos(Obj_AI_Hero target, float _range,float _speed, float _delay, float _width)
-        {
-            // dek prediction  
-            // lots bugs about get distance
-            if (isValidTarget(target))
-            {
-                float range = _range;
-                float speed = _speed;
-                float delay = _delay;
-                float width = 0;
-                if (_width > 0)
-                {
-                    width = _width / 2;
-                }
-                var distance = Player.Distance(target);
-                var Time = distance / speed;
-                if (speed != float.MaxValue && speed > 0)
-                {
-                    Time = Time + delay;
-                }
-                else
-                {
-                    speed = distance / delay;
-                    Time = distance / speed;
-                }
 
-                //Vector3 predictPos;
-                var targetPos1 = new Vector3(target.Position.X,target.Position.Y,target.Position.Z);
-                var targetPos2 = new Vector3(target.Position.X, target.Position.Y, target.Position.Z);
-                var canmoveDistance = target.MoveSpeed * Time;
-                var dba = canmoveDistance;
-                //Vector3 _ca;
-                //Vector3 aca;
-                List<Vector2> waypoints = target.GetWaypoints();
-
-                if (target.IsMoving)
-                {
-                    bool DashingStatus = target.IsDashing();
-                    float DashingSpeed = target.GetDashInfo().Speed;
-                    Vector3 DashingEndPos = target.GetDashInfo().EndPos.To3D();
-                    float DashingDuration = target.GetDashInfo().Duration;
-
-                    if (DashingStatus)
-                    {
-                        //Game.PrintChat("Debug : Dashing Pred");
-                        var DashingDistance = DashingSpeed * Time;
-                        targetPos2 = new Vector3(DashingEndPos.X, DashingEndPos.Y, DashingEndPos.Z);
-                        predictPos = targetPos1 + targetPos2 - targetPos1.Normalized() * DashingDistance;
-                        if (target.Distance(predictPos) > target.Distance(DashingEndPos))
-                        {
-                            predictPos = new Vector3(DashingEndPos.X, DashingEndPos.Y, DashingEndPos.Z);
-                        }
-                    }
-                    else
-                    {
-                        for (int i = 0; i < waypoints.Count -1; i++)
-                        {
-                            _ca = waypoints[i].To3D();
-                            if (_ca.IsValid())
-                            {
-                                //aca = aca || _ca;
-                                var DashingDistance = target.Distance(_ca);
-                                
-                                dba = dba - DashingDistance;
-                                if (dba <= 0)
-                                {
-                                    targetPos2 = new Vector3(_ca.X, _ca.Y, _ca.Z);
-                                    predictPos = targetPos1 + targetPos2 - targetPos1.Normalized() * canmoveDistance;
-                                    //Game.PrintChat("Debug : Normal Pred");
-                                    break;
-                                }
-                            }
-                        }
-                        if (dba > 0 && _ca.IsValid())
-                        {
-                            var DashingDistance = target.Distance(_ca);
-                            var acc = dba - DashingDistance;
-                            if (width >= acc)
-                            {
-                                targetPos2 = new Vector3(_ca.X, _ca.Y, _ca.Z);
-                                predictPos = targetPos1 + targetPos2 - targetPos1.Normalized() * canmoveDistance;
-                                //Game.PrintChat("Debug : width Pred");
-                            }
-                            else
-                            {
-                                predictPos = targetPos1 + targetPos2 - targetPos1.Normalized() * canmoveDistance;
-                                //Game.PrintChat("Debug : other Pred");
-                            }
-                        }
-                    }
-                }
-                else
-                {
-                    //Game.PrintChat("Debug : Not moving Pred");
-                    predictPos = targetPos1;
-                }
-                if (predictPos.IsValid())
-                {
-                    if (range >= Player.Distance(predictPos))
-                    {
-                        return predictPos;
-                    }
-                }
-                return predictPos = new Vector3(0, 0, 0);
-            }
-            else
-            {
-                return predictPos = new Vector3(0,0,0);
-            }
-            //return predictPos;
-        }
-
-        protected Vector3 GetPredictedPos2(Obj_AI_Hero target, float _range, float _delay, float _width, float _speed = float.MaxValue)
-        {
-            predictPos = new Vector3(0, 0, 0);
-            float Time = 0;
-            if (_speed != float.MaxValue && _speed >0)
-            {
-                Time = Time + _delay;
-            }
-            else
-            {
-                Time = 0;
-            }
-
-            List<Vector2> waypoints = target.GetWaypoints();
-            if (target.IsMoving && waypoints.Count > 1)
-            {
-                for (int i = 0; i < waypoints.Count - 1; i++)
-                {
-                    var a = waypoints[i];
-                    var b = waypoints[i + 1];
-                    var UnitVector = (b - a).Normalized();
-                    
-                    for (int j = 0; j < 5; i++)
-                    {
-                        Time = Time + 0.1f;
-                        var dd = (a + UnitVector * target.MoveSpeed * Time).To3D();
-                        var ff = Time * _speed;
-
-                        if (Math.Abs(Player.Distance(dd) - ff) < 10)
-                        {
-                            //Game.PrintChat("compile");
-                            predictPos = dd;
-                            break;
-                        }
-                    }
-                    if (!predictPos.IsZero)
-                    {
-                        break;
-                    }
-                }
-            }
-            else
-            {
-                //Game.PrintChat("not moving");
-            }
-
-            if (!predictPos.IsZero)
-            {
-                if (_range >= Player.Distance(predictPos))
-                {
-                    return predictPos;
-                }
-                else
-                {
-                    return predictPos = new Vector3(0, 0, 0);
-                }
-            }
-            else
-            {
-                return predictPos = new Vector3(0, 0, 0);
-            }
-        }
-
-        /// <summary>
+        /// <Target>
         ///     Target Info
         /// </summary>
         /// <param name="hero"></param>
         /// <returns></returns>
         /// 
+
         protected Obj_AI_Hero GetTarget(Spell _spell, TargetSelector.DamageType _DamageType, bool IsCharge = false)
         {
             if (IsCharge)
@@ -485,6 +323,129 @@ namespace OPGodKaiser
             return untargetable;
         }
 
+        protected bool EnemyHasShield(Obj_AI_Hero target)
+        {
+            var status = false;
+            if (target.HasBuff("blackshield"))
+            {
+                status = true;
+            }
+
+            if (target.HasBuff("sivire"))
+            {
+                status = true;
+            }
+
+            if (target.HasBuff("nocturneshroudofdarkness"))
+            {
+                status = true;
+            }
+
+            if (target.HasBuff("bansheesveil"))
+            {
+                status = true;
+            }
+            return status;
+        }
+
+        private struct ChampionPower
+        {
+            public const float AttackDamage = 36f;
+            public const float AbilityPower = 21.75f;
+            public const float Health = -1.66f;
+            public const float Armor = -10f;
+        }
+
+        private struct PowerInfo
+        {
+            public static Obj_AI_Hero Champion;
+            public static float power;
+        }
+
+        private List<PowerInfo> PowerList = new List<PowerInfo>();
+
+        protected Obj_AI_Hero FindDmgStrongHero(List<Obj_AI_Hero> target, float range)
+        {
+            foreach(var hero in target.Where(x => Player.Distance(x) < range))
+            {
+                Single value = 0;
+                value += hero.TotalAttackDamage * ChampionPower.AttackDamage;
+                value += hero.TotalMagicalDamage * ChampionPower.AbilityPower;
+                value += hero.MaxHealth * ChampionPower.Health;
+                value += hero.Armor * ChampionPower.Armor;
+                //Console.WriteLine("{0} : {1}", hero.ChampionName, value);
+                if (PowerInfo.Champion == null)
+                {
+                    PowerInfo.Champion = hero;
+                    PowerInfo.power = value;
+                }
+                else if (value > PowerInfo.power)
+                {
+                    PowerInfo.Champion = hero;
+                    PowerInfo.power = value;
+                }
+            }
+
+            return PowerInfo.Champion;
+        }
+
+        /// <Collision>
+        ///     Collision
+        /// </summary>
+        /// <param name="target"></param>
+        /// <returns></returns>
+
+        protected List<Obj_AI_Base> GetWallCollision(List<Vector3> positions, Vector3 From)
+        {
+            var result = new List<Obj_AI_Base>();
+
+            foreach (var position in positions)
+            {
+                var step = position.Distance(From) / 20;
+
+                for (var i = 0; i < 20; i++)
+                {
+                    var p = From.To2D().Extend(position.To2D(), step * i);
+                    if (NavMesh.GetCollisionFlags(p.X, p.Y).HasFlag(CollisionFlags.Wall))
+                    {
+                        result.Add(ObjectManager.Player);
+                    }
+                }
+            }
+
+            return result.Distinct().ToList();
+        }
+
+        // Tks xSalice VectorSegment code
+        protected Object[] VectorPointProjectionOnLineSegment(Vector2 v1, Vector2 v2, Vector2 v3)
+        {
+            float cx = v3.X;
+            float cy = v3.Y;
+            float ax = v1.X;
+            float ay = v1.Y;
+            float bx = v2.X;
+            float by = v2.Y;
+            float rL = ((cx - ax) * (bx - ax) + (cy - ay) * (by - ay)) /
+                       ((float)Math.Pow(bx - ax, 2) + (float)Math.Pow(by - ay, 2));
+            var pointLine = new Vector2(ax + rL * (bx - ax), ay + rL * (by - ay));
+            float rS;
+            if (rL < 0)
+            {
+                rS = 0;
+            }
+            else if (rL > 1)
+            {
+                rS = 1;
+            }
+            else
+            {
+                rS = rL;
+            }
+            bool isOnSegment = rS.CompareTo(rL) == 0;
+            Vector2 pointSegment = isOnSegment ? pointLine : new Vector2(ax + rS * (bx - ax), ay + rS * (@by - ay));
+            return new object[] { pointSegment, pointLine, isOnSegment };
+        }
+
         /// <summary>
         ///     CountNearHero
         /// </summary>
@@ -521,41 +482,7 @@ namespace OPGodKaiser
             return ally.GetSpellDamage(target, SpellSlot.Q) + ally.GetSpellDamage(target, SpellSlot.W) + ally.GetSpellDamage(target, SpellSlot.E) + ally.GetSpellDamage(target, SpellSlot.R);
         }
 
-        /// <summary>
-        ///     Mana Manager
-        /// </summary>
-        /// <returns></returns>
-
-        protected bool ManaManager()
-        {
-            var status = false;
-            if (!Player.IsDead)
-                return status;
-
-                // Special case 
-                if (Player.ChampionName == "Udyr")
-                {
-                    var totalmana = WMana[W.Level] * 2 + EMana[E.Level] * 2;
-                    float havemana = Player.Mana;
-                    if (havemana > totalmana)
-                    {
-                        status = true; 
-                    }
-                }
-                else
-                {
-                    var totalmana = QMana[Q.Level] + WMana[W.Level] + EMana[E.Level] + RMana[R.Level];
-                    float havemana = Player.Mana;
-
-                    if (havemana > totalmana)
-                    {
-                        status = true;
-                    }
-                }
-                return status;
-        }
-
-        /// <summary>
+        /// <Drwaing>
         ///     Drwaing
         /// </summary>
         /// <param name="x"></param>
@@ -575,12 +502,15 @@ namespace OPGodKaiser
             Drawing.DrawLine(topRight.X, topRight.Y, botLeft.X, botLeft.Y, thickness, color);
         }
 
-        /// <summary>
+        /// <Debug && Develop Envirment>
         ///     Debug
         /// </summary>
 
         protected void debug<T>(string sector, T str)
         {
+            if (!config.Item("debugM").GetValue<bool>())
+                return;
+
             Game.PrintChat("Debug-{0} : {1}",sector ,str);
         }
 
@@ -653,6 +583,11 @@ namespace OPGodKaiser
                     }
                 }
             }
+            // Debug
+            if (!predictPos.IsZero)
+            {
+                Drawing.DrawCircle(predictPos,200,System.Drawing.Color.Red);
+            }
         }
         
         protected virtual void Drawing_OnEndScene(EventArgs args)
@@ -698,6 +633,11 @@ namespace OPGodKaiser
         }
 
         protected virtual void Obj_AI_Base_OnDelete(GameObject sender, EventArgs args)
+        {
+            
+        }
+
+        protected virtual void Spellbook_OnCastSpell(Spellbook sender, SpellbookCastSpellEventArgs args)
         {
             
         }

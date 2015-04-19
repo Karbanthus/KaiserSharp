@@ -207,7 +207,6 @@ namespace OPGodKaiser.Champions
 
         private void CheckBuff()
         {
-            //Game.PrintChat(":{0}", StunAble.Count);
             if (Player.HasBuff("UdyrPhoenixStance"))
             {
                 switch (Player.Buffs.Find(buff => buff.DisplayName == "UdyrPhoenixStance").Count)

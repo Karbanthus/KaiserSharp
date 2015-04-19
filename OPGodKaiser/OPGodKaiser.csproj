@@ -83,8 +83,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Champions\Nautilus.cs" />
+    <Compile Include="Champions\Udyr.cs" />
     <Compile Include="CommonData.cs" />
     <Compile Include="Champions\Vladimir.cs" />
+    <Compile Include="Initiator.cs" />
     <Compile Include="Loader.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
