@@ -105,11 +105,8 @@ namespace OPGodKaiser
             {
                 key.AddItem(new MenuItem("ComboActive", "Combo", true).SetValue(new KeyBind(32, KeyBindType.Press)));
                 key.AddItem(new MenuItem("HarassActive", "Harass", true).SetValue(new KeyBind("T".ToCharArray()[0], KeyBindType.Press)));
-                key.AddItem(new MenuItem("HarassActiveT", "Harass (toggle)", true).SetValue(new KeyBind("X".ToCharArray()[0], KeyBindType.Toggle)));
                 key.AddItem(new MenuItem("LastHitKey", "LastHit", true).SetValue(new KeyBind("Z".ToCharArray()[0], KeyBindType.Press)));
-                key.AddItem(new MenuItem("LastHitKeyT", "LastHit (toggle)", true).SetValue(new KeyBind("U".ToCharArray()[0], KeyBindType.Toggle)));
                 key.AddItem(new MenuItem("LaneClearActive", "Lane Clear", true).SetValue(new KeyBind("C".ToCharArray()[0], KeyBindType.Press)));
-                key.AddItem(new MenuItem("LaneClearActiveT", "Lane Clear (toggle)", true).SetValue(new KeyBind("A".ToCharArray()[0], KeyBindType.Toggle)));
 
                 config.AddSubMenu(key);
             }

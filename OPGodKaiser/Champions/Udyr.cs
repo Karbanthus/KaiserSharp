@@ -67,8 +67,7 @@ namespace OPGodKaiser.Champions
                 combomenu.AddItem(new MenuItem("C-UseW", "Use W", true).SetValue(true));
                 combomenu.AddItem(new MenuItem("C-UseE", "Use E", true).SetValue(true));
                 combomenu.AddItem(new MenuItem("C-UseR", "Use R", true).SetValue(true));
-                combomenu.AddItem(new MenuItem("StunCount", "Min Stun target", true).SetValue(new Slider(1, 1, 5)));
-                combomenu.AddItem(new MenuItem("savemana", "Save a minimum of mana can Flee.", true).SetValue(false));
+                //combomenu.AddItem(new MenuItem("StunCount", "Min Stun target", true).SetValue(new Slider(1, 1, 5)));
                 config.AddSubMenu(combomenu);
             }
             /*
@@ -99,7 +98,7 @@ namespace OPGodKaiser.Champions
             var useR = config.Item("C-UseR", true).GetValue<bool>();
             var useSaveMana = config.Item("savemana", true).GetValue<bool>();
             var target = TargetSelector.GetTarget(700, TargetSelector.DamageType.Magical);
-            var stuncount = config.Item("StunCount", true).GetValue<Slider>().Value;
+            var stuncount = 1;//config.Item("StunCount", true).GetValue<Slider>().Value;
 
             if (target != null)
             {

@@ -19,7 +19,7 @@ namespace OPGodKaiser.Champions
             LoadMenu();
 
             Game.PrintChat("<font color=\"#66CCFF\" >Kaiser's </font><font color=\"#CCFFFF\" >{0}</font> - " +
-               "<font color=\"#FFFFFF\" >Version " + Assembly.GetExecutingAssembly().GetName().Version + "</font>",Player.ChampionName);
+               "<font color=\"#FFFFFF\" >Version " + Assembly.GetExecutingAssembly().GetName().Version + "</font>", Player.ChampionName);
         }
 
         private void LoadSpellData()
@@ -36,7 +36,7 @@ namespace OPGodKaiser.Champions
             SpellList.Add(E);
             SpellList.Add(R);
         }
-        
+
         private void LoadMenu()
         {
             var MiscKey = new Menu("MiscKey", "MiscKey");
@@ -45,7 +45,7 @@ namespace OPGodKaiser.Champions
 
                 config.AddSubMenu(MiscKey);
             }
-           
+
             var combomenu = new Menu("Combo", "Combo");
             {
                 combomenu.AddItem(new MenuItem("C-UseQ", "Use Q", true).SetValue(true));
@@ -59,7 +59,7 @@ namespace OPGodKaiser.Champions
                 //combomenu.AddItem(new MenuItem("minNoKillEnemies", "Min No. Of KS Enemies", true).SetValue(new Slider(2, 1, 5)));
                 config.AddSubMenu(combomenu);
             }
-            
+
             var harassmenu = new Menu("Harass", "Harass");
             {
                 harassmenu.AddItem(new MenuItem("H-UseQ", "Use Q", true).SetValue(true));
@@ -68,7 +68,7 @@ namespace OPGodKaiser.Champions
 
                 config.AddSubMenu(harassmenu);
             }
-            
+
             var farmmenu = new Menu("Farm", "Farm");
             {
                 farmmenu.AddItem(new MenuItem("LastHit Setting", "LastHit Setting", true));
@@ -95,7 +95,7 @@ namespace OPGodKaiser.Champions
                 Drawingmenu.AddItem(new MenuItem("Qcircle", "Q Range").SetValue(new Circle(true, Color.FromArgb(100, 255, 0, 255))));
                 Drawingmenu.AddItem(new MenuItem("Ecircle", "E Range").SetValue(new Circle(true, Color.FromArgb(100, 255, 255, 255))));
                 Drawingmenu.AddItem(new MenuItem("Rcircle", "R Range").SetValue(new Circle(true, Color.FromArgb(255, 255, 255, 255))));
-                
+
 
                 //Damage after combo:
                 var dmgAfterComboItem = new MenuItem("DamageAfterCombo", "Draw damage after combo", true).SetValue(true);
@@ -210,7 +210,7 @@ namespace OPGodKaiser.Champions
                 E.Cast();
             }
         }
-        
+
         private void Farm()
         {
             var allMinions = MinionManager.GetMinions(Player.ServerPosition, Q.Range);
@@ -240,7 +240,7 @@ namespace OPGodKaiser.Champions
             if (UseE && E.IsReady())
             {
                 if (rangedMinionsE.Count >= 2)
-                    E.Cast();  
+                    E.Cast();
             }
         }
 
@@ -309,13 +309,8 @@ namespace OPGodKaiser.Champions
 
         protected override void OnUpdate(EventArgs args)
         {
-            //base.OnUpdate(args);
             if (Player.IsDead)
                 return;
-
-            //debug
-            //Game.PrintChat("minionCount : {0}", MinionManager.GetMinions(E.Range, MinionTypes.All, MinionTeam.NotAlly).Count);
-            //Game.PrintChat("configCOunt : {0}", config.Item("CheckMinions", true).GetValue<Slider>().Value);
 
             //check KS
             if (config.Item("UseKS", true).GetValue<bool>())
@@ -335,32 +330,23 @@ namespace OPGodKaiser.Champions
                 {
                     Harass();
                 }
-                else if (config.Item("HarassActiveT", true).GetValue<KeyBind>().Active)
-                {
-                    Harass();
-                }
+
                 //farm
                 if (config.Item("LastHitKey", true).GetValue<KeyBind>().Active)
                 {
                     Farm();
                 }
-                else if (config.Item("LastHitKeyT", true).GetValue<KeyBind>().Active)
-                {
-                    Farm();
-                }
+
                 //lane clear
                 if (config.Item("LaneClearActive", true).GetValue<KeyBind>().Active)
                 {
                     LaneClear();
                 }
-                else if (config.Item("LaneClearActiveT", true).GetValue<KeyBind>().Active)
-                {
-                    LaneClear();
-                }
+
             }
 
             //AutoR
-            if (config.Item("AutoR",true).GetValue<bool>() && R.IsReady())
+            if (config.Item("AutoR", true).GetValue<bool>() && R.IsReady())
             {
                 AutoUlt();
             }
@@ -370,11 +356,10 @@ namespace OPGodKaiser.Champions
             {
                 AutoEStack();
             }
-            
+
             //comboDmg drawing
             if (config.Item("DamageAfterCombo", true).GetValue<bool>())
             {
-                //Game.PrintChat("damage");
                 GetComboDamage(TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical));
             }
         }
@@ -388,31 +373,13 @@ namespace OPGodKaiser.Champions
                     E.LastCastAttemptT = Environment.TickCount + 250;
                 }
             }
-            /*
-            if (sender.IsEnemy && !sender.IsMinion)
-            {
-                foreach (var detectspell in Spells)
-                {
-                    if (detectspell.ChampionName == sender.Name && detectspell.SpellName == args.SData.Name)
-                    {
-                        if (detectspell.Range * 1.03 > Player.Distance(sender.Position))
-                        {
-                            if (W.IsReady() && config.Item("UseEavdeW", true).GetValue<bool>())
-                            {
-                                W.Cast();
-                            }
-                        }
-                    }
-                }
-            }*/
-
         }
 
         protected override void OnEnemyGapcloser(ActiveGapcloser gapcloser)
         {
             if (!config.Item("UseWGapCloser", true).GetValue<bool>())
                 return;
-            //Game.PrintChat("anti debug");
+
             if (W.IsReady() && gapcloser.Sender.Distance(Player) < 300)
             {
                 W.Cast();
@@ -447,76 +414,6 @@ namespace OPGodKaiser.Champions
         {
             base.Drawing_OnEndScene(args);
         }
-        /*
-        public struct AntiSpell
-        {
-            public string ChampionName;
-            public string SpellName;
-            public SpellSlot Slot;
-            public float Range;
-        }
-        public static List<AntiSpell> Spells = new List<AntiSpell>();
-
-        static void AntiSpells()
-        {
-            #region Amumu
-
-            Spells.Add(
-                new AntiSpell
-                {
-                    ChampionName = "Amumu",
-                    SpellName = "CurseoftheSadMummy",
-                    Slot = SpellSlot.R,
-                    Range = 550,
-                });
-
-            #endregion Amumu
-
-            #region Annie
-
-            Spells.Add(
-                new AntiSpell
-                {
-                    ChampionName = "Annie",
-                    SpellName = "InfernalGuardian",
-                    Slot = SpellSlot.R,
-                    Range = 600,
-                });
-
-            #endregion Annie
-
-            #region Evelynn
-
-            Spells.Add(
-                new AntiSpell
-                {
-                    ChampionName = "Annie",
-                    SpellName = "InfernalGuardian",
-                    Slot = SpellSlot.R,
-                    Range = 600,
-                });
-
-            #endregion Evelynn
-
-            #region Fiddlesticks
-
-            Spells.Add(
-                new AntiSpell
-                {
-                    ChampionName = "Annie",
-                    SpellName = "InfernalGuardian",
-                    Slot = SpellSlot.R,
-                    Range = 600,
-                });
-
-            #endregion Fiddlesticks
-        }*/
     }
 }
-/* 
- * Amumu : R , Annie : R, Evelynn : R , Fiddlesticks : Q
- * Galio : R , Garen : R , Gragas : R, Karthus : R , Lissandra : R
- * Malphite : R , Malzahar : R , Morgana : R(End time) , Orianna : R
- * Rammus : E , Rek'sai : E , Sejuani : R , Shen : E , Sona : R , Skarner : R , Twisted Fate : W(Gold Card)
- * Varus : R , Vi : R , Warwick : R , 
- */
+
