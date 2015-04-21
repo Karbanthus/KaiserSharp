@@ -9,7 +9,8 @@ using LeagueSharp.Common;
  * 1.0.1.2 : Fixed Compile error (2015-03-29)
  * 1.0.2.0 : Add enemies Waypoints && Fixed Vladimir : Auto Stack E,Ult (2015-04-02)
  * 1.0.2.1 : Fixed Loader for L# sandbox
- * 1.0.4.0 : ADD Champions Udyr , Nautilus
+ * 1.0.4.0 : Add Champions Udyr , Nautilus
+ * 1.0.5.0 : Add Champions Amumu
  */
 
 

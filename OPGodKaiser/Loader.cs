@@ -16,9 +16,24 @@ namespace OPGodKaiser
                 case "udyr":
                     new Champions.Udyr();
                     break;
-                    /*
+                case "nautilus":
+                    new Champions.Nautilus();
+                    break;
+                case "amumu":
+                    new Champions.Amumu();
+                    break;
+                /*
                 case "thresh":
                     new Champions.Thresh();
+                    break;
+                case "orianna":
+                    new Champions.Orianna();
+                    break;
+                 */
+
+                    /*
+                case "reksai":
+                    new Champions.RekSai();
                     break;
                 case "xerath":
                     new Champions.Xerath();
@@ -28,13 +43,7 @@ namespace OPGodKaiser
                     break;
                 case "twistedfate":
                     new Champions.TwistedFate();
-                    break;
-                case "orianna":
-                    new Champions.Orianna();
                     break;*/
-                case "nautilus":
-                    new Champions.Nautilus();
-                    break;
             }
         }
     }
