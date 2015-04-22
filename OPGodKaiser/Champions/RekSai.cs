@@ -11,31 +11,47 @@ using Color = System.Drawing.Color;
 
 namespace OPGodKaiser.Champions
 {
-    class Nautilus  : CommonData
+    class RekSai : CommonData
     {
-        public Nautilus()
+        private Obj_AI_Hero AfterAttackHero;
+
+        public RekSai()
         {
             LoadSpellData();
             LoadMenu();
 
-            Game.PrintChat("<font color=\"#66CCFF\" >Kaiser's OPGodKaiserProject : </font><font color=\"#CCFFFF\" >{0}</font> - " +
+            Game.PrintChat("<font color=\"#66CCFF\" >Kaiser's OPGodKaiserProject Champ:</font><font color=\"#CCFFFF\" >{0}</font> - " +
                "<font color=\"#FFFFFF\" >Version " + Assembly.GetExecutingAssembly().GetName().Version + "</font>", Player.ChampionName);
+        }
+
+        private Spell QNormal, WNormal, ENormal;
+        private Spell QBurrow, WBurrow, EBurrow;
+        
+        public Spell Q
+        {
+            get { return (Burrowed()) ? QBurrow : QNormal; }
         }
 
         private void LoadSpellData()
         {
-            Q = new Spell(SpellSlot.Q, 1080);
-            W = new Spell(SpellSlot.W);
-            E = new Spell(SpellSlot.E, 400);
-            R = new Spell(SpellSlot.R, 825);
+            // normal
+            QNormal = new Spell(SpellSlot.Q, 300);
+            WNormal = new Spell(SpellSlot.W);
+            ENormal = new Spell(SpellSlot.E, 250);
 
-            Q.SetSkillshot(0.25f, 80f, 1200f, true, SkillshotType.SkillshotLine);
-            E.SetSkillshot(0.1f, 400f, float.MaxValue, false, SkillshotType.SkillshotCircle);
+            // Burrow
+            QBurrow = new Spell(SpellSlot.Q, 1500);
+            QBurrow.SetSkillshot(0.125f, 60f, 1950f, true, SkillshotType.SkillshotLine);
+            
+            WBurrow = new Spell(SpellSlot.W);
+            
+            EBurrow = new Spell(SpellSlot.E, 750);
+            EBurrow.SetSkillshot(0, 60f, 1600f, false, SkillshotType.SkillshotLine);
 
-            SpellList.Add(Q);
-            SpellList.Add(W);
-            SpellList.Add(E);
-            SpellList.Add(R);
+            //Init
+            W = (Burrowed()) ? WBurrow : WNormal;
+            E = (Burrowed()) ? EBurrow : ENormal;
+            R = new Spell(SpellSlot.R);
         }
 
         private void LoadMenu()
@@ -97,28 +113,25 @@ namespace OPGodKaiser.Champions
 
         private void Combo()
         {
-            var target = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
+            var Qtarget = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
 
-            if (config.Item("ComboActive", true).GetValue<KeyBind>().Active && target != null)
+            if (config.Item("ComboActive", true).GetValue<KeyBind>().Active && Qtarget != null)
             {
-                StunLogic();
-                if (config.Item("C-UseR", true).GetValue<bool>() && R.IsReady())
+                if (Burrowed())
                 {
-                    CastR();
+                    Orbwalker.SetAttack(false);
+
+                    if (config.Item("C-UseQ", true).GetValue<bool>() && Q.IsReady() && Qtarget != null)
+                    {
+                        CastQ(Qtarget);
+                    }
                 }
-                if (config.Item("C-UseE", true).GetValue<bool>() && E.IsReady())
+                else
                 {
-                    CastE(target);
+
                 }
-                if (config.Item("C-UseQ", true).GetValue<bool>() && Q.IsReady())
-                {
-                    CastQ(target);
-                }
-                if (!Q.IsReady() && !E.IsReady() && config.Item("C-UseW", true).GetValue<bool>() && W.IsReady() && Player.Distance(target) < 700)
-                {
-                    CastW();
-                }
-                KSCheck(target);
+
+                KSCheck(Qtarget);
             }
         }
 
@@ -141,7 +154,7 @@ namespace OPGodKaiser.Champions
 
         private void KSCheck(Obj_AI_Hero target)
         {
-            if (target != null && target.Type == Player.Type)
+            if (target != null)
             {
                 if (config.Item("KS-UseQ", true).GetValue<bool>())
                 {
@@ -166,7 +179,7 @@ namespace OPGodKaiser.Champions
         {
             foreach (Obj_AI_Hero enemyhero in ObjectManager.Get<Obj_AI_Hero>().Where(x => x.IsEnemy && !x.IsDead && Player.Distance(x) < 1000 && isValidTarget(x)))
             {
-                if (!enemyhero.HasBuff("nautiluspassivecheck"))
+                if (!enemyhero.HasBuff("RekSaiKnockupImmune"))
                 {
                     if (Orbwalker.InAutoAttackRange(enemyhero) && Orbwalking.CanAttack())
                     {
@@ -181,24 +194,23 @@ namespace OPGodKaiser.Champions
 
         private void CastQ(Obj_AI_Hero target)
         {
-            if (!Q.IsReady() || !isValidTarget(target) || target == null || EnemyHasShield(target))
+            if (!Q.IsReady() || !isValidTarget(target) || target == null)
                 return;
 
-            if (!E.IsReady() || (E.IsReady() && E.Range < Player.Distance(target)))
+            if (Burrowed())
             {
-                var predict = Q.GetPrediction(target);
-                var positions = new List<Vector3> { predict.UnitPosition, predict.CastPosition, target.Position };
-                var coll = GetWallCollision(positions, Player.Position);
+                var Predict = Q.GetPrediction(target);
 
-                //Console.WriteLine("Collision : " + coll.Count);
-
-                if (predict.Hitchance >= HitChance.High && coll.Count < 1)
+                if (Predict.Hitchance >= HitChance.High)
                 {
                     Q.Cast(target);
-                    if (config.Item("C-UseW", true).GetValue<bool>() && W.IsReady())
-                    {
-                        CastW();
-                    }
+                }
+            }
+            else
+            {
+                if (Player.Distance(AfterAttackHero) < Q.Range && AfterAttackHero != null && isValidTarget(AfterAttackHero))
+                {
+                    Q.Cast();
                 }
             }
         }
@@ -212,29 +224,6 @@ namespace OPGodKaiser.Champions
                 return;
 
             W.Cast();
-        }
-
-        private void AutoShield()
-        {
-            if (!W.IsReady() || !config.Item("AutoShield", true).GetValue<bool>())
-                return;
-            
-            Single CurHpPer = 0;
-            var PastHpPer = Player.Health / Player.MaxHealth * 100;
-            Utility.DelayAction.Add(500, () => CurHpPer = Player.Health / Player.MaxHealth * 100);
-            //Console.WriteLine("curhp :" + CurHpPer);
-            //Console.WriteLine("pasthp :" + PastHpPer);
-            if (CurHpPer != 0)
-            {
-                if (PastHpPer - CurHpPer > 10)
-                {
-                    debug<string>("AutoShield", "Work");
-                    W.Cast();
-                    CurHpPer = 0;
-                }
-                else
-                    CurHpPer = 0;
-            }
         }
 
         /// <E>
@@ -257,18 +246,37 @@ namespace OPGodKaiser.Champions
 
         /// <R>
         /// <returns></returns>
-        
+
         private void CastR()
         {
             if (!R.IsReady())
                 return;
 
-            var Rtarget = FindDmgStrongHero(HeroManager.Enemies, 1650);
+        }
 
-            if (Rtarget != null && Player.Distance(Rtarget) < R.Range)
-            {
-                R.CastOnUnit(Rtarget);
-            }
+        /// <Buff>
+        ///     Buff
+        /// </summary>
+        /// <returns></returns>
+
+        private bool Burrowed()
+        {
+            return Player.Buffs.Any<BuffInstance>(x => x.Caster.IsMe && x.DisplayName == "RekSaiW");
+        }
+
+        private bool QNormalBuff()
+        {
+            return Player.Buffs.Any(x => x.Caster.IsMe && x.DisplayName == "RekSaiQ");
+        }
+
+        private bool TunnelReady()
+        {
+            return !Player.Buffs.Any(x => x.Caster.IsMe && x.DisplayName == "RekSaiECooldown");
+        }
+
+        private bool HasFullFury()
+        {
+            return Player.MaxMana == Player.Mana;
         }
 
         /// <Events>
@@ -282,39 +290,19 @@ namespace OPGodKaiser.Champions
             Combo();
             Harass();
 
-            AutoShield();
-
         }
 
-        protected override void OnEnemyGapcloser(ActiveGapcloser gapcloser)
+        protected override void OnAfterAttack(AttackableUnit unit, AttackableUnit target)
         {
-            if (!config.Item("UseWGapCloser", true).GetValue<bool>())
-                return;
-
-            if (W.IsReady() && gapcloser.Sender.IsEnemy)
+            if (unit.IsMe && target.IsEnemy && target.Type == Player.Type)
             {
-                debug<string>("OnEnemyGapcloser", "GapCloser");
-                W.Cast();
-            }
-        }
+                var a = (Obj_AI_Hero)target;
 
-        protected override void OnPossibleToInterrupt(Obj_AI_Hero sender, Interrupter2.InterruptableTargetEventArgs args)
-        {
-            if (Player.IsDead)
-                return;
-
-            if (!config.Item("UseQInterrupt", true).GetValue<bool>())
-                return;
-
-                if (Player.Distance(sender.Position) < Q.Range && sender.IsEnemy && sender != null)
+                if (a != null)
                 {
-                    if (Q.IsReady() && Q.GetPrediction(sender).Hitchance >= HitChance.High)
-                    {
-                        debug<string>("OnPossibleToInterrupt", "Interrupt");
-                        Q.Cast(sender);
-                    }
+                    AfterAttackHero = a;
                 }
-
+            }
         }
 
         protected override void OnDraw(EventArgs args)
