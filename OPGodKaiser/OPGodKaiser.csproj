@@ -84,7 +84,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Champions\Amumu.cs" />
-    <Compile Include="Champions\Karthus.cs" />
     <Compile Include="Champions\Nautilus.cs" />
     <Compile Include="Champions\Udyr.cs" />
     <Compile Include="CommonData.cs" />

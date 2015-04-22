@@ -11,7 +11,6 @@ using LeagueSharp.Common;
  * 1.0.2.1 : Fixed Loader for L# sandbox
  * 1.0.4.0 : Add Champions Udyr , Nautilus
  * 1.0.5.0 : Add Champions Amumu
- * 1.0.6.0 : Add Champions Karthus
  */
 
 
