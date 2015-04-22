@@ -22,12 +22,7 @@ namespace OPGodKaiser
                 case "amumu":
                     new Champions.Amumu();
                     break;
-                case "karthus":
-                    new Champions.Karthus();
-                    break;
-                    
-                    
-                    /*
+                /*
                 case "thresh":
                     new Champions.Thresh();
                     break;

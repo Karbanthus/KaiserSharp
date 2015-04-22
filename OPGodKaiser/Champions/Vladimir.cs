@@ -18,7 +18,7 @@ namespace OPGodKaiser.Champions
             LoadSpellData();
             LoadMenu();
 
-            Game.PrintChat("<font color=\"#66CCFF\" >Kaiser's OPGodKaiserProject : </font><font color=\"#CCFFFF\" >{0}</font> - " +
+            Game.PrintChat("<font color=\"#66CCFF\" >Kaiser's </font><font color=\"#CCFFFF\" >{0}</font> - " +
                "<font color=\"#FFFFFF\" >Version " + Assembly.GetExecutingAssembly().GetName().Version + "</font>", Player.ChampionName);
         }
 
