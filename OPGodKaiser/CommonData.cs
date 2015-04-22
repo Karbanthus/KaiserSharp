@@ -116,6 +116,7 @@ namespace OPGodKaiser
             config.AddToMainMenu();
         }
 
+ 
         /// <Prediction>
         ///     Predict
         /// </summary>
@@ -133,7 +134,7 @@ namespace OPGodKaiser
             var GetPredict = spell.GetPrediction(target, _aoe);
             HitChance hitchance = GetPredict.Hitchance;
             bool result = false;
-            
+
             //aoe
             var aoetarget = GetPredict.AoeTargetsHit;
             var AoetargetCount = GetPredict.AoeTargetsHitCount;
@@ -256,6 +257,251 @@ namespace OPGodKaiser
             }
             return result;
         }
+
+        protected Vector3 GetPredictedPos(Obj_AI_Hero target, float _range, float _speed, float _delay, float _width)
+        {
+            // dek prediction  
+            // lots bugs about get distance
+            if (isValidTarget(target))
+            {
+                float range = _range;
+                float speed = _speed;
+                float delay = _delay;
+                float width = 0;
+                if (_width > 0)
+                {
+                    width = _width / 2;
+                }
+                var distance = Player.Distance(target);
+                var Time = distance / speed;
+                if (speed != float.MaxValue && speed > 0)
+                {
+                    Time = Time + delay;
+                }
+                else
+                {
+                    speed = distance / delay;
+                    Time = distance / speed;
+                }
+
+                //Vector3 predictPos;
+                var targetPos1 = new Vector3(target.Position.X, target.Position.Y, target.Position.Z);
+                var targetPos2 = new Vector3(target.Position.X, target.Position.Y, target.Position.Z);
+                var canmoveDistance = target.MoveSpeed * Time;
+                var dba = canmoveDistance;
+                //Vector3 _ca;
+                //Vector3 aca;
+                List<Vector2> waypoints = target.GetWaypoints();
+
+                if (target.IsMoving)
+                {
+                    bool DashingStatus = target.IsDashing();
+                    float DashingSpeed = target.GetDashInfo().Speed;
+                    Vector3 DashingEndPos = target.GetDashInfo().EndPos.To3D();
+                    float DashingDuration = target.GetDashInfo().Duration;
+
+                    if (DashingStatus)
+                    {
+                        //Game.PrintChat("Debug : Dashing Pred");
+                        var DashingDistance = DashingSpeed * Time;
+                        targetPos2 = new Vector3(DashingEndPos.X, DashingEndPos.Y, DashingEndPos.Z);
+                        predictPos = targetPos1 + targetPos2 - targetPos1.Normalized() * DashingDistance;
+                        if (target.Distance(predictPos) > target.Distance(DashingEndPos))
+                        {
+                            predictPos = new Vector3(DashingEndPos.X, DashingEndPos.Y, DashingEndPos.Z);
+                        }
+                    }
+                    else
+                    {
+                        for (int i = 0; i < waypoints.Count - 1; i++)
+                        {
+                            _ca = waypoints[i].To3D();
+                            if (_ca.IsValid())
+                            {
+                                //aca = aca || _ca;
+                                var DashingDistance = target.Distance(_ca);
+
+                                dba = dba - DashingDistance;
+                                if (dba <= 0)
+                                {
+                                    targetPos2 = new Vector3(_ca.X, _ca.Y, _ca.Z);
+                                    predictPos = targetPos1 + targetPos2 - targetPos1.Normalized() * canmoveDistance;
+                                    //Game.PrintChat("Debug : Normal Pred");
+                                    break;
+                                }
+                            }
+                        }
+                        if (dba > 0 && _ca.IsValid())
+                        {
+                            var DashingDistance = target.Distance(_ca);
+                            var acc = dba - DashingDistance;
+                            if (width >= acc)
+                            {
+                                targetPos2 = new Vector3(_ca.X, _ca.Y, _ca.Z);
+                                predictPos = targetPos1 + targetPos2 - targetPos1.Normalized() * canmoveDistance;
+                                //Game.PrintChat("Debug : width Pred");
+                            }
+                            else
+                            {
+                                predictPos = targetPos1 + targetPos2 - targetPos1.Normalized() * canmoveDistance;
+                                //Game.PrintChat("Debug : other Pred");
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    //Game.PrintChat("Debug : Not moving Pred");
+                    predictPos = targetPos1;
+                }
+                if (predictPos.IsValid())
+                {
+                    if (range >= Player.Distance(predictPos))
+                    {
+                        return predictPos;
+                    }
+                }
+                return predictPos = new Vector3(0, 0, 0);
+            }
+            else
+            {
+                return predictPos = new Vector3(0, 0, 0);
+            }
+            //return predictPos;
+        }
+
+        protected Vector3 GetPredictedPos2(Obj_AI_Hero target, float _range, float _delay, float _width, float _speed = float.MaxValue)
+        {
+            //beta ver
+            predictPos = new Vector3(0, 0, 0);
+            float Time = 0;
+            if (_speed != float.MaxValue && _speed > 0)
+            {
+                Time = Time + _delay;
+            }
+            else
+            {
+                Time = _delay;
+            }
+
+            List<Vector2> waypoints = target.GetWaypoints();
+            bool DashingStatus = target.IsDashing();
+            float DashingSpeed = target.GetDashInfo().Speed;
+            Vector3 DashingEndPos = target.GetDashInfo().EndPos.To3D();
+            float DashingDuration = target.GetDashInfo().Duration;
+
+            if (DashingStatus)
+            {
+                Game.PrintChat("Debug : Dashing Pred");
+                var DashingDistance = DashingSpeed * Time;
+                var targetPos2 = new Vector3(DashingEndPos.X, DashingEndPos.Y, DashingEndPos.Z);
+                predictPos = target.Position + targetPos2 - target.Position.Normalized() * DashingDistance;
+                if (target.Distance(predictPos) > target.Distance(DashingEndPos))
+                {
+                    predictPos = new Vector3(DashingEndPos.X, DashingEndPos.Y, DashingEndPos.Z);
+                }
+            }
+            else if (waypoints.Count > 1)
+            {
+                for (int i = 0; i < waypoints.Count - 1; i++)
+                {
+                    var a = waypoints[i];
+                    var b = waypoints[i + 1];
+                    var UnitVector = (b - a).Normalized();
+
+                    for (int j = 0; j < 10; j++)
+                    {
+                        Time = Time + 0.05f;
+                        var dd = (a + UnitVector * target.MoveSpeed * Time).To3D();
+                        var ff = Time * _speed;
+
+                        if (Math.Abs(Player.Distance(dd) - ff) < 20)
+                        {
+                            Game.PrintChat("Debug : Normal Pred");
+                            predictPos = dd;
+                            break;
+                        }
+                    }
+                    if (!predictPos.IsZero)
+                    {
+                        break;
+                    }
+                }
+            }
+            else
+            {
+                Game.PrintChat("Debug : Not moving Pred");
+                predictPos = target.Position;
+            }
+
+            if (!predictPos.IsZero)
+            {
+                if (_range >= Player.Distance(predictPos))
+                {
+                    return predictPos;
+                }
+                else
+                {
+                    return predictPos = new Vector3(0, 0, 0);
+                }
+            }
+            else
+            {
+                return predictPos = new Vector3(0, 0, 0);
+            }
+        }
+
+        protected PredictionOutput GetP(Vector3 pos, Spell spell, Obj_AI_Base target, float delay, bool aoe)
+        {
+            return Prediction.GetPrediction(new PredictionInput
+            {
+                Unit = target,
+                Delay = spell.Delay + delay,
+                Radius = spell.Width,
+                Speed = spell.Speed,
+                From = pos,
+                Range = spell.Range,
+                Collision = spell.Collision,
+                Type = spell.Type,
+                RangeCheckFrom = Player.ServerPosition,
+                Aoe = aoe,
+            });
+        }
+
+        protected PredictionOutput GetP(Vector3 pos, Spell spell, Obj_AI_Base target, bool aoe)
+        {
+            return Prediction.GetPrediction(new PredictionInput
+            {
+                Unit = target,
+                Delay = spell.Delay,
+                Radius = spell.Width,
+                Speed = spell.Speed,
+                From = pos,
+                Range = spell.Range,
+                Collision = spell.Collision,
+                Type = spell.Type,
+                RangeCheckFrom = Player.ServerPosition,
+                Aoe = aoe,
+            });
+        }
+
+        protected PredictionOutput GetPCircle(Vector3 pos, Spell spell, Obj_AI_Base target, bool aoe)
+        {
+            return Prediction.GetPrediction(new PredictionInput
+            {
+                Unit = target,
+                Delay = spell.Delay,
+                Radius = 1,
+                Speed = float.MaxValue,
+                From = pos,
+                Range = float.MaxValue,
+                Collision = spell.Collision,
+                Type = spell.Type,
+                RangeCheckFrom = pos,
+                Aoe = aoe,
+            });
+        }
+
 
         /// <Target>
         ///     Target Info
@@ -509,6 +755,38 @@ namespace OPGodKaiser
                 return;
 
             Game.PrintChat("Debug-{0} : {1}",sector ,str);
+        }
+
+        protected void Spelldebug(SpellSlot a)
+        {
+            // SData
+            var data = Player.Spellbook.GetSpell(a).SData;
+
+            // Range
+            var range = data.CastRange;
+            var range2 = data.CastRadius;
+            var range3 = data.CastRangeDisplayOverride;
+            
+            Console.WriteLine("range1 : " + range);
+            Console.WriteLine("range2 : " + range2);
+            Console.WriteLine("range3 : " + range3);
+
+
+            // Delay
+            var delay = data.CastFrame / 30f;
+            Console.WriteLine("delay : " + delay);
+
+            // Speed
+            var speed = data.MissileSpeed;
+            var speed2 = data.MissileMaxSpeed;
+            var speed3 = data.MissileMaxSpeed;
+            Console.WriteLine("speed : " + speed);
+            Console.WriteLine("speed2 : " + speed2);
+            Console.WriteLine("speed3 : " + speed3);
+
+            // Width
+            var width = data.LineWidth;
+            Console.WriteLine("width : " + width);
         }
 
         /// <summary>
