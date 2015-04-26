@@ -70,6 +70,7 @@ namespace OPGodKaiser.Champions
                 //combomenu.AddItem(new MenuItem("StunCount", "Min Stun target", true).SetValue(new Slider(1, 1, 5)));
                 config.AddSubMenu(combomenu);
             }
+
             /*
             var Miscmenu = new Menu("Misc", "Misc");
             {
@@ -80,12 +81,12 @@ namespace OPGodKaiser.Champions
                 config.AddSubMenu(Miscmenu);
             }
             */
+
             var Drawingmenu = new Menu("Drawings", "Drawings");
             {
                 Drawingmenu.AddItem(new MenuItem("EStunCircle", "E Stun Circle", true).SetValue(new Circle(true, Color.FromArgb(100, 255, 0, 255))));
                 Drawingmenu.AddItem(new MenuItem("TargetCircle", "TargetCircle", true).SetValue(new Circle(true, Color.FromArgb(100, 255, 0, 255))));
-                //Drawingmenu.AddItem(new MenuItem("UseStunTImer", "Use StunTImer", true).SetValue(true));
-
+                
                 config.AddSubMenu(Drawingmenu);
             }
         }
@@ -96,16 +97,14 @@ namespace OPGodKaiser.Champions
             var useW = config.Item("C-UseW", true).GetValue<bool>();
             var useE = config.Item("C-UseE", true).GetValue<bool>();
             var useR = config.Item("C-UseR", true).GetValue<bool>();
-            var useSaveMana = config.Item("savemana", true).GetValue<bool>();
             var target = TargetSelector.GetTarget(700, TargetSelector.DamageType.Magical);
-            var stuncount = 1;//config.Item("StunCount", true).GetValue<Slider>().Value;
+            var stuncount = 1; //config.Item("StunCount", true).GetValue<Slider>().Value;
 
             if (target != null)
             {
                 if (Player.Distance(target) > 350)
                 {
                     E.Cast();
-                    //debug<string>("combo", "Run!!");
                 }
 
                 if (StanceStatus != UdyrStance.None)
@@ -235,7 +234,7 @@ namespace OPGodKaiser.Champions
         {
             if (Player.IsDead)
                 return;
-            
+
             CheckBuff();
             StunCheck();
             StunCheck2();
@@ -282,42 +281,24 @@ namespace OPGodKaiser.Champions
             {
                 Render.Circle.DrawCircle(ObjectManager.Player.Position, 700 , EStunCircle.Color);
             }
-
+            
             if (TargetCircle.Active)
             {
-                var orbtarget = Orbwalker.GetTarget();
-                if (orbtarget.IsValid)
-                    Render.Circle.DrawCircle(orbtarget.Position, 150, System.Drawing.Color.Red, 7);
+                if (Orbwalker.GetTarget() != null)
+                {
+                    var orbtarget = Orbwalker.GetTarget();
+                    if (orbtarget.IsValid)
+                    {
+                        Render.Circle.DrawCircle(orbtarget.Position, 150, System.Drawing.Color.Red, 7);
+                    }
+                }
             }
-            /*
-            if (config.Item("UseStunTImer", true).GetValue<bool>())
-            {
-                
-                if (StunAble.Count > 0)
-                {
-                    for (int i = 0; i < StunAble.Count; i++)
-                    {
-                        var pos = Drawing.WorldToScreen(StunAble[i].Champion.Position);
-                        var time = StunAble[i].StartTime;
-                        var StunCycletimer = (time + 5800 - Environment.TickCount > 0) ? (time + 5800 - Environment.TickCount) / 1000 : 0;
+            
+        }
 
-                        if (StunCycletimer != 0)
-                        {
-                            Drawing.DrawText(pos.X - 40, pos.Y + 10, Color.Yellow, "Stun Recycle Time: " + StunCycletimer.ToString("0.0"));
-                        }
-                    }
-                }
-                foreach (Obj_AI_Hero enemyhero in ObjectManager.Get<Obj_AI_Hero>().Where(a => a.IsEnemy && !a.IsDead && Player.Distance(a) < 1500 && a.HasBuff("udyrbearstuncheck", true)))
-                {
-                    var pos = Drawing.WorldToScreen(enemyhero.Position);
-                    var StunCycletimer = (Environment.TickCount + 5800 - Environment.TickCount > 0) ? (Environment.TickCount  + 5800 - Environment.TickCount) / 1000 : 0;
-
-                    if (StunCycletimer != 0)
-                    {
-                        Drawing.DrawText(pos.X - 40, pos.Y + 10, Color.Yellow, "Stun Recycle Time: " + StunCycletimer.ToString("0.0"));
-                    }
-                }
-            }*/
+        protected override void Drawing_OnEndScene(EventArgs args)
+        {
+            base.Drawing_OnEndScene(args);
         }
     }
 }
