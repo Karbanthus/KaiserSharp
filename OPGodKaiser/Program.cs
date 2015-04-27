@@ -12,6 +12,8 @@ using LeagueSharp.Common;
  * 1.0.4.0 : Add Champions Udyr , Nautilus
  * 1.0.5.0 : Add Champions Amumu
  * 1.0.6.0 : Add Champions Karthus
+ * 1.0.6.2 : Fixed Udyr Don't work Combo
+ * 1.0.6.3 : Fixed Karthus LastHit
  */
 
 

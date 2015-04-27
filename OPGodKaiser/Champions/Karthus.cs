@@ -168,16 +168,26 @@ namespace OPGodKaiser.Champions
         {
             if (config.Item("LastHitKey", true).GetValue<KeyBind>().Active)
             {
-                var a = MinionManager.GetMinions(Q.Range, MinionTypes.All, MinionTeam.NotAlly, MinionOrderTypes.Health);
-                
-                foreach(var b in a)
+                var minions = MinionManager.GetMinions(Q.Range, MinionTypes.All, MinionTeam.NotAlly, MinionOrderTypes.Health);
+
+                foreach (var minion in minions)
                 {
-                    if (HealthPrediction.GetHealthPrediction(b, (int)(Player.Distance(b) * 1000 / 2000)) < Player.GetSpellDamage(b, SpellSlot.Q) - 10 && config.Item("LH-UseQ", true).GetValue<bool>() && Q.IsReady())
+                    var helath = HealthPrediction.GetHealthPrediction(minion, 700);
+                    var predict = Q.GetCircularFarmLocation(minions);
+                    var minionPredict = Prediction.GetPrediction(minion, Q.Delay, 190, Q.Speed);
+
+                    if (predict.MinionsHit == 1)
                     {
-                        var d =Prediction.GetPrediction(b, Q.Delay, Q.Width, Q.Speed);
-                        if (d.Hitchance >= HitChance.High)
+                        if (Player.GetSpellDamage(minion, SpellSlot.Q) - 10 > helath && minionPredict.Hitchance >= HitChance.High)
                         {
-                            Q.Cast(b);
+                            Q.Cast(minionPredict.CastPosition);
+                        }
+                    }
+                    else
+                    {
+                        if (Player.GetSpellDamage(minion, SpellSlot.Q, 1) - 10 > helath && minionPredict.Hitchance >= HitChance.High)
+                        {
+                            Q.Cast(minionPredict.CastPosition);
                         }
                     }
                 }
@@ -207,7 +217,9 @@ namespace OPGodKaiser.Champions
 
         /// <Q>
         /// <param name="target"></param>
-
+        Vector3 a;
+        Vector3 b;
+        Vector3 c;
         private void CastQ(Obj_AI_Hero target)
         {
             if (!Q.IsReady() || !isValidTarget(target) || target == null)
@@ -219,13 +231,14 @@ namespace OPGodKaiser.Champions
             {
                 Q.Cast(predict.CastPosition);
             }
+            
         }
 
         private void AutoQ()
         {
             if (!Q.IsReady() || !config.Item("QImmobile", true).GetValue<bool>() || Player.IsDead)
                 return;
-
+            
             foreach(Obj_AI_Hero enemyhero in ObjectManager.Get<Obj_AI_Hero>().Where(x => isValidTarget(x) && x.IsEnemy && Player.Distance(x) < Q.Range))
             {
                 var predict = Q.GetPrediction(enemyhero, true);
@@ -235,6 +248,7 @@ namespace OPGodKaiser.Champions
                     Q.Cast(enemyhero);
                 }
             }
+
         }
 
         /// <W>
@@ -388,9 +402,6 @@ namespace OPGodKaiser.Champions
 
         protected override void OnDraw(EventArgs args)
         {
-            if (Player.IsDead)
-                return;
-
             base.OnDraw(args);
             var QCircle = config.Item("Qcircle").GetValue<Circle>();
             var WCircle = config.Item("Wcircle").GetValue<Circle>();
@@ -410,7 +421,7 @@ namespace OPGodKaiser.Champions
             {
                 Render.Circle.DrawCircle(ObjectManager.Player.Position, E.Range, ECircle.Color);
             }
-            Render.Circle.DrawCircle(ObjectManager.Player.Position, 160, ECircle.Color);
+            
             RKillable();
         }
 
