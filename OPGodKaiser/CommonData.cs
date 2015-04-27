@@ -502,7 +502,6 @@ namespace OPGodKaiser
             });
         }
 
-
         /// <Target>
         ///     Target Info
         /// </summary>
@@ -526,7 +525,7 @@ namespace OPGodKaiser
                 return null;
         }
 
-        protected static bool isValidTarget(Obj_AI_Hero hero)
+        public static bool isValidTarget(Obj_AI_Hero hero)
         {
             if (hero.IsValid && !hero.IsDead && hero.IsVisible && !isUntargetable(hero))
             {
