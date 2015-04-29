@@ -8,7 +8,7 @@ using LeagueSharp.Common;
 using SharpDX;
 using Color = System.Drawing.Color;
 
-namespace OPGodKaiser
+namespace OpProject
 {
     class CommonData
     {
@@ -20,15 +20,13 @@ namespace OPGodKaiser
         }
 
         //Spells
-        protected Spell Q;
+        protected Spell Q { get; set; }
         protected Spell W;
         protected Spell E;
         protected Spell R;
         protected readonly List<Spell> SpellList = new List<Spell>();
 
         protected SpellSlot IgniteSlot = ObjectManager.Player.GetSpellSlot("SummonerDot");
-
-        //Damage
 
         //Mana
         protected int[] QMana = { 0, 0, 0, 0, 0 };
@@ -39,14 +37,8 @@ namespace OPGodKaiser
         //Menu
         public static Menu config;
 
-        //predict
-        Vector3 predictPos = new Vector3(0,0,0);
-        Vector3 _ca;
-
         //OrbWalk
         protected static Orbwalking.Orbwalker Orbwalker;
-
-        //Vector2 waypoint;
 
         protected CommonData()
         {
@@ -70,6 +62,8 @@ namespace OPGodKaiser
             Obj_AI_Base.OnCreate += Obj_AI_Base_OnCreate;
             Obj_AI_Base.OnDelete += Obj_AI_Base_OnDelete;
             Spellbook.OnCastSpell += Spellbook_OnCastSpell;
+            Helpers.DamagePrediction.OnSpellDmg += DamagePrediction_OnSpellDmg;
+            Evade.Targeted.TargetedDetector.TSDetector += TargetedDetector_TSDetector;
 
             //Game.OnGameSendPacket += OnSendPacket;
             //Game.OnGameProcessPacket += OnProcessPacket;
@@ -116,414 +110,12 @@ namespace OPGodKaiser
             config.AddToMainMenu();
         }
 
- 
-        /// <Prediction>
-        ///     Predict
-        /// </summary>
-        /// <param name="target"></param>
-        /// <param name="spell"></param>
-        /// <param name="_aoe"></param>
-        /// <param name="_collision"></param>
-        /// <param name="requireHitCount"></param>
-        /// <returns></returns>
-
-        protected bool GetPredicted(Obj_AI_Hero target, Spell spell, bool _aoe, bool _collision, int requireHitCount = 1)
-        {
-            //normal
-            bool collision = spell.CastIfHitchanceEquals(target, HitChance.Collision);
-            var GetPredict = spell.GetPrediction(target, _aoe);
-            HitChance hitchance = GetPredict.Hitchance;
-            bool result = false;
-
-            //aoe
-            var aoetarget = GetPredict.AoeTargetsHit;
-            var AoetargetCount = GetPredict.AoeTargetsHitCount;
-
-            //special
-            bool Dashing = spell.CastIfHitchanceEquals(target, HitChance.Dashing);
-            bool Immobile = spell.CastIfHitchanceEquals(target, HitChance.Immobile);
-
-            //test
-            var c = GetPredict.UnitPosition.To2D();
-            var WaypointsList = target.GetWaypoints();
-
-            //test
-            /*
-            foreach (Vector2 waypoint in WaypointsList)
-            {
-                if (waypoint == c)
-                {
-                    Game.PrintChat("[test] waypoint == predict pos");
-                }
-            }*/
-
-            //predict
-            if (target.IsValid && target != null && !target.IsDead)
-            {
-                if (_aoe) // check aoe
-                {
-                    if (Player.Distance(target) < spell.Range && spell.IsReady() && isValidTarget(target))
-                    {
-                        if (Immobile)
-                        {
-                            result = true;
-                        }
-                        else if (Dashing)
-                        {
-                            if (_collision)
-                            {
-                                if (!collision && hitchance >= HitChance.High)
-                                {
-                                    result = true;
-                                }
-                            }
-                            else
-                            {
-                                if (hitchance >= HitChance.High)
-                                {
-                                    result = true;
-                                }
-                            }
-                        }
-                        else
-                        {
-                            foreach (Obj_AI_Hero targetable in aoetarget)
-                            {
-                                if (targetable == target)
-                                {
-                                    if (_collision)
-                                    {
-                                        if (!collision && hitchance >= HitChance.High && AoetargetCount >= requireHitCount)
-                                        {
-                                            result = true;
-                                        }
-                                    }
-                                    else
-                                    {
-                                        if (hitchance >= HitChance.High && AoetargetCount >= requireHitCount)
-                                        {
-                                            result = true;
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-                else // check aoe
-                {
-                    if (Player.Distance(target) < spell.Range && spell.IsReady() && isValidTarget(target))
-                    {
-                        if (Immobile)
-                        {
-                            result = true;
-                        }
-                        else if (Dashing)
-                        {
-                            if (_collision)
-                            {
-                                if (!collision && hitchance >= HitChance.High)
-                                {
-                                    result = true;
-                                }
-                            }
-                            else
-                            {
-                                if (hitchance >= HitChance.High)
-                                {
-                                    result = true;
-                                }
-                            }
-                        }
-                        else
-                        {
-                            if (_collision)
-                            {
-                                if (!collision && hitchance >= HitChance.High)
-                                {
-                                    result = true;
-                                }
-                            }
-                            else
-                            {
-                                if (hitchance >= HitChance.High)
-                                {
-                                    result = true;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            return result;
-        }
-
-        protected Vector3 GetPredictedPos(Obj_AI_Hero target, float _range, float _speed, float _delay, float _width)
-        {
-            // dek prediction  
-            // lots bugs about get distance
-            if (isValidTarget(target))
-            {
-                float range = _range;
-                float speed = _speed;
-                float delay = _delay;
-                float width = 0;
-                if (_width > 0)
-                {
-                    width = _width / 2;
-                }
-                var distance = Player.Distance(target);
-                var Time = distance / speed;
-                if (speed != float.MaxValue && speed > 0)
-                {
-                    Time = Time + delay;
-                }
-                else
-                {
-                    speed = distance / delay;
-                    Time = distance / speed;
-                }
-
-                //Vector3 predictPos;
-                var targetPos1 = new Vector3(target.Position.X, target.Position.Y, target.Position.Z);
-                var targetPos2 = new Vector3(target.Position.X, target.Position.Y, target.Position.Z);
-                var canmoveDistance = target.MoveSpeed * Time;
-                var dba = canmoveDistance;
-                //Vector3 _ca;
-                //Vector3 aca;
-                List<Vector2> waypoints = target.GetWaypoints();
-
-                if (target.IsMoving)
-                {
-                    bool DashingStatus = target.IsDashing();
-                    float DashingSpeed = target.GetDashInfo().Speed;
-                    Vector3 DashingEndPos = target.GetDashInfo().EndPos.To3D();
-                    float DashingDuration = target.GetDashInfo().Duration;
-
-                    if (DashingStatus)
-                    {
-                        //Game.PrintChat("Debug : Dashing Pred");
-                        var DashingDistance = DashingSpeed * Time;
-                        targetPos2 = new Vector3(DashingEndPos.X, DashingEndPos.Y, DashingEndPos.Z);
-                        predictPos = targetPos1 + targetPos2 - targetPos1.Normalized() * DashingDistance;
-                        if (target.Distance(predictPos) > target.Distance(DashingEndPos))
-                        {
-                            predictPos = new Vector3(DashingEndPos.X, DashingEndPos.Y, DashingEndPos.Z);
-                        }
-                    }
-                    else
-                    {
-                        for (int i = 0; i < waypoints.Count - 1; i++)
-                        {
-                            _ca = waypoints[i].To3D();
-                            if (_ca.IsValid())
-                            {
-                                //aca = aca || _ca;
-                                var DashingDistance = target.Distance(_ca);
-
-                                dba = dba - DashingDistance;
-                                if (dba <= 0)
-                                {
-                                    targetPos2 = new Vector3(_ca.X, _ca.Y, _ca.Z);
-                                    predictPos = targetPos1 + targetPos2 - targetPos1.Normalized() * canmoveDistance;
-                                    //Game.PrintChat("Debug : Normal Pred");
-                                    break;
-                                }
-                            }
-                        }
-                        if (dba > 0 && _ca.IsValid())
-                        {
-                            var DashingDistance = target.Distance(_ca);
-                            var acc = dba - DashingDistance;
-                            if (width >= acc)
-                            {
-                                targetPos2 = new Vector3(_ca.X, _ca.Y, _ca.Z);
-                                predictPos = targetPos1 + targetPos2 - targetPos1.Normalized() * canmoveDistance;
-                                //Game.PrintChat("Debug : width Pred");
-                            }
-                            else
-                            {
-                                predictPos = targetPos1 + targetPos2 - targetPos1.Normalized() * canmoveDistance;
-                                //Game.PrintChat("Debug : other Pred");
-                            }
-                        }
-                    }
-                }
-                else
-                {
-                    //Game.PrintChat("Debug : Not moving Pred");
-                    predictPos = targetPos1;
-                }
-                if (predictPos.IsValid())
-                {
-                    if (range >= Player.Distance(predictPos))
-                    {
-                        return predictPos;
-                    }
-                }
-                return predictPos = new Vector3(0, 0, 0);
-            }
-            else
-            {
-                return predictPos = new Vector3(0, 0, 0);
-            }
-            //return predictPos;
-        }
-
-        protected Vector3 GetPredictedPos2(Obj_AI_Hero target, float _range, float _delay, float _width, float _speed = float.MaxValue)
-        {
-            //beta ver
-            predictPos = new Vector3(0, 0, 0);
-            float Time = 0;
-            if (_speed != float.MaxValue && _speed > 0)
-            {
-                Time = Time + _delay;
-            }
-            else
-            {
-                Time = _delay;
-            }
-
-            List<Vector2> waypoints = target.GetWaypoints();
-            bool DashingStatus = target.IsDashing();
-            float DashingSpeed = target.GetDashInfo().Speed;
-            Vector3 DashingEndPos = target.GetDashInfo().EndPos.To3D();
-            float DashingDuration = target.GetDashInfo().Duration;
-
-            if (DashingStatus)
-            {
-                Game.PrintChat("Debug : Dashing Pred");
-                var DashingDistance = DashingSpeed * Time;
-                var targetPos2 = new Vector3(DashingEndPos.X, DashingEndPos.Y, DashingEndPos.Z);
-                predictPos = target.Position + targetPos2 - target.Position.Normalized() * DashingDistance;
-                if (target.Distance(predictPos) > target.Distance(DashingEndPos))
-                {
-                    predictPos = new Vector3(DashingEndPos.X, DashingEndPos.Y, DashingEndPos.Z);
-                }
-            }
-            else if (waypoints.Count > 1)
-            {
-                for (int i = 0; i < waypoints.Count - 1; i++)
-                {
-                    var a = waypoints[i];
-                    var b = waypoints[i + 1];
-                    var UnitVector = (b - a).Normalized();
-
-                    for (int j = 0; j < 10; j++)
-                    {
-                        Time = Time + 0.05f;
-                        var dd = (a + UnitVector * target.MoveSpeed * Time).To3D();
-                        var ff = Time * _speed;
-
-                        if (Math.Abs(Player.Distance(dd) - ff) < 20)
-                        {
-                            Game.PrintChat("Debug : Normal Pred");
-                            predictPos = dd;
-                            break;
-                        }
-                    }
-                    if (!predictPos.IsZero)
-                    {
-                        break;
-                    }
-                }
-            }
-            else
-            {
-                Game.PrintChat("Debug : Not moving Pred");
-                predictPos = target.Position;
-            }
-
-            if (!predictPos.IsZero)
-            {
-                if (_range >= Player.Distance(predictPos))
-                {
-                    return predictPos;
-                }
-                else
-                {
-                    return predictPos = new Vector3(0, 0, 0);
-                }
-            }
-            else
-            {
-                return predictPos = new Vector3(0, 0, 0);
-            }
-        }
-
-        protected PredictionOutput GetP(Vector3 pos, Spell spell, Obj_AI_Base target, float delay, bool aoe)
-        {
-            return Prediction.GetPrediction(new PredictionInput
-            {
-                Unit = target,
-                Delay = spell.Delay + delay,
-                Radius = spell.Width,
-                Speed = spell.Speed,
-                From = pos,
-                Range = spell.Range,
-                Collision = spell.Collision,
-                Type = spell.Type,
-                RangeCheckFrom = Player.ServerPosition,
-                Aoe = aoe,
-            });
-        }
-
-        protected PredictionOutput GetP(Vector3 pos, Spell spell, Obj_AI_Base target, bool aoe)
-        {
-            return Prediction.GetPrediction(new PredictionInput
-            {
-                Unit = target,
-                Delay = spell.Delay,
-                Radius = spell.Width,
-                Speed = spell.Speed,
-                From = pos,
-                Range = spell.Range,
-                Collision = spell.Collision,
-                Type = spell.Type,
-                RangeCheckFrom = Player.ServerPosition,
-                Aoe = aoe,
-            });
-        }
-
-        protected PredictionOutput GetPCircle(Vector3 pos, Spell spell, Obj_AI_Base target, bool aoe)
-        {
-            return Prediction.GetPrediction(new PredictionInput
-            {
-                Unit = target,
-                Delay = spell.Delay,
-                Radius = 1,
-                Speed = float.MaxValue,
-                From = pos,
-                Range = float.MaxValue,
-                Collision = spell.Collision,
-                Type = spell.Type,
-                RangeCheckFrom = pos,
-                Aoe = aoe,
-            });
-        }
-
         /// <Target>
         ///     Target Info
         /// </summary>
         /// <param name="hero"></param>
         /// <returns></returns>
         /// 
-
-        protected Obj_AI_Hero GetTarget(Spell _spell, TargetSelector.DamageType _DamageType, bool IsCharge = false)
-        {
-            if (IsCharge)
-            {
-                var a = TargetSelector.GetTarget(_spell.ChargedMaxRange, _DamageType);
-                return a;
-            }
-            else if (!IsCharge)
-            {
-                var a = TargetSelector.GetTarget(_spell.Range, _DamageType);
-                return a;
-            }
-            else
-                return null;
-        }
 
         public static bool isValidTarget(Obj_AI_Hero hero)
         {
@@ -803,7 +395,6 @@ namespace OPGodKaiser
 
         protected virtual void Obj_AI_Base_OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
         {
-            
         }
 
         protected virtual void OnPossibleToInterrupt(Obj_AI_Hero sender, Interrupter2.InterruptableTargetEventArgs args)
@@ -815,8 +406,7 @@ namespace OPGodKaiser
         }
 
         protected virtual void OnUpdate(EventArgs args)
-        {
-            
+        { 
         }
 
         protected virtual void OnBeforeAttack(Orbwalking.BeforeAttackEventArgs args)
@@ -826,7 +416,7 @@ namespace OPGodKaiser
         protected virtual void OnAfterAttack(AttackableUnit unit, AttackableUnit target)
         {
         }
-        //base
+       
         protected virtual void OnLoad(EventArgs args)
         {
         }
@@ -857,11 +447,6 @@ namespace OPGodKaiser
                     }
                 }
             }
-            // Debug
-            if (!predictPos.IsZero)
-            {
-                Drawing.DrawCircle(predictPos,200,System.Drawing.Color.Red);
-            }
         }
         
         protected virtual void Drawing_OnEndScene(EventArgs args)
@@ -888,32 +473,34 @@ namespace OPGodKaiser
 
         protected virtual void Obj_AI_Hero_OnPlayAnimation(Obj_AI_Base sender, GameObjectPlayAnimationEventArgs args)
         {
-            
         }
 
         protected virtual void Obj_AI_Base_OnIssueOrder(Obj_AI_Base sender, GameObjectIssueOrderEventArgs args)
         {
-            
         }
 
         protected virtual void Game_OnWndProc(WndEventArgs args)
         {
-            
         }
 
         protected virtual void Obj_AI_Base_OnCreate(GameObject sender, EventArgs args)
-        {
-            
+        { 
         }
 
         protected virtual void Obj_AI_Base_OnDelete(GameObject sender, EventArgs args)
-        {
-            
+        { 
         }
 
         protected virtual void Spellbook_OnCastSpell(Spellbook sender, SpellbookCastSpellEventArgs args)
         {
-            
+        }
+
+        protected virtual void DamagePrediction_OnSpellDmg(Obj_AI_Hero sender, Obj_AI_Hero target, float dmg)
+        {
+        }
+
+        protected virtual void TargetedDetector_TSDetector(Evade.Targeted.TargetSpell spell)
+        {
         }
     }
 }

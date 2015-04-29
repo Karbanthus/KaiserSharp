@@ -2,7 +2,7 @@
 using LeagueSharp;
 using LeagueSharp.Common;
 
-namespace OPGodKaiser
+namespace OpProject
 {
     class Loader
     {
@@ -25,16 +25,25 @@ namespace OPGodKaiser
                 case "karthus":
                     new Champions.Karthus();
                     break;
-                    
-                    
-                    /*
+                case "nunu":
+                    new Champions.Nunu();
+                    break;
+                case "sivir":
+                    new Champions.Sivir();
+                    break;
+                case "morgana":
+                    new Champions.Morgana();
+                    break;
+
+
+                /*
                 case "thresh":
                     new Champions.Thresh();
                     break;
                 case "orianna":
                     new Champions.Orianna();
-                    break;
-                 */
+                    break;*/
+                 
 
                     /*
                 case "reksai":

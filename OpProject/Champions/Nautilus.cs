@@ -7,7 +7,7 @@ using LeagueSharp.Common;
 using SharpDX;
 using Color = System.Drawing.Color;
 
-namespace OPGodKaiser.Champions
+namespace OpProject.Champions
 {
     class Nautilus  : CommonData
     {
@@ -16,7 +16,7 @@ namespace OPGodKaiser.Champions
             LoadSpellData();
             LoadMenu();
 
-            Game.PrintChat("<font color=\"#66CCFF\" >Kaiser's OPGodKaiserProject : </font><font color=\"#CCFFFF\" >{0}</font> - " +
+            Game.PrintChat("<font color=\"#66CCFF\" >Kaiser's OpProject : </font><font color=\"#CCFFFF\" >{0}</font> - " +
                "<font color=\"#FFFFFF\" >Version " + Assembly.GetExecutingAssembly().GetName().Version + "</font>", Player.ChampionName);
         }
 

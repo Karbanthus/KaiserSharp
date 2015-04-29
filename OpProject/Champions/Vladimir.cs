@@ -5,7 +5,7 @@ using LeagueSharp;
 using LeagueSharp.Common;
 using Color = System.Drawing.Color;
 
-namespace OPGodKaiser.Champions
+namespace OpProject.Champions
 {
     class Vladimir : CommonData
     {
@@ -14,7 +14,7 @@ namespace OPGodKaiser.Champions
             LoadSpellData();
             LoadMenu();
 
-            Game.PrintChat("<font color=\"#66CCFF\" >Kaiser's OPGodKaiserProject : </font><font color=\"#CCFFFF\" >{0}</font> - " +
+            Game.PrintChat("<font color=\"#66CCFF\" >OpProject : </font><font color=\"#CCFFFF\" >{0}</font> - " +
                "<font color=\"#FFFFFF\" >Version " + Assembly.GetExecutingAssembly().GetName().Version + "</font>", Player.ChampionName);
         }
 
@@ -52,7 +52,6 @@ namespace OPGodKaiser.Champions
                 combomenu.AddItem(new MenuItem("AutoR", "Use AutoR", true).SetValue(true));
                 combomenu.AddItem(new MenuItem("AutoROnlyComboActive", "Use AutoR (Only Combo Active)", true).SetValue(true));
                 combomenu.AddItem(new MenuItem("minNoEnemies", "Min No. Of Enemies", true).SetValue(new Slider(2, 1, 5)));
-                //combomenu.AddItem(new MenuItem("minNoKillEnemies", "Min No. Of KS Enemies", true).SetValue(new Slider(2, 1, 5)));
                 config.AddSubMenu(combomenu);
             }
 
@@ -60,7 +59,6 @@ namespace OPGodKaiser.Champions
             {
                 harassmenu.AddItem(new MenuItem("H-UseQ", "Use Q", true).SetValue(true));
                 harassmenu.AddItem(new MenuItem("H-UseE", "Use E", true).SetValue(false));
-                //harassmenu.AddItem(new MenuItem("CheckMinions", "Don't Use E if min Minions have in Erange", true).SetValue(new Slider(2, 0, 7)));
 
                 config.AddSubMenu(harassmenu);
             }
@@ -133,17 +131,18 @@ namespace OPGodKaiser.Champions
 
         private void Combo()
         {
-            var Qtarget = GetTarget(Q, TargetSelector.DamageType.Magical);
-            var Etarget = GetTarget(E, TargetSelector.DamageType.Magical);
+            var Qtarget = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
+            var Etarget = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Magical);
 
-            var CanCastQ = GetPredicted(Qtarget, Q, false, false);
-            var CanCastE = GetPredicted(Etarget, E, true, false);
+            var CanCastQ = Q.GetPrediction(Qtarget).Hitchance >= HitChance.High ? true : false;
+            var CanCastE = E.GetPrediction(Etarget, true).Hitchance >= HitChance.High ? true : false;
 
             var useQ = config.Item("C-UseQ", true).GetValue<bool>();
             var useW = config.Item("C-UseW", true).GetValue<bool>();
             var useE = config.Item("C-UseE", true).GetValue<bool>();
             var useR = config.Item("C-UseR", true).GetValue<bool>();
             UltCheck();
+            
             if (useR && R.IsReady())
             {
                 UltCheck();
@@ -179,11 +178,11 @@ namespace OPGodKaiser.Champions
 
         private void Harass()
         {
-            var Qtarget = GetTarget(Q, TargetSelector.DamageType.Magical);
-            var Etarget = GetTarget(E, TargetSelector.DamageType.Magical);
+            var Qtarget = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
+            var Etarget = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Magical);
 
-            var CanCastQ = GetPredicted(Qtarget, Q, false, false);
-            var CanCastE = GetPredicted(Etarget, E, true, false);
+            var CanCastQ = Q.GetPrediction(Qtarget).Hitchance >= HitChance.High ? true : false;
+            var CanCastE = E.GetPrediction(Etarget, true).Hitchance >= HitChance.High ? true : false;
 
             var useQ = config.Item("H-UseQ", true).GetValue<bool>();
             var useE = config.Item("H-UseE", true).GetValue<bool>();
@@ -195,14 +194,6 @@ namespace OPGodKaiser.Champions
 
             if (useE && CanCastE)
             {
-                //var mincount = config.Item("CheckMinions", true).GetValue<Slider>().Value;
-                //var minioncount = MinionManager.GetMinions(Player.ServerPosition, E.Range, MinionTypes.All, MinionTeam.Enemy).Count;
-                /*
-                if (mincount >= minioncount)
-                {
-                    E.Cast();
-                }
-                return;*/
                 E.Cast();
             }
         }

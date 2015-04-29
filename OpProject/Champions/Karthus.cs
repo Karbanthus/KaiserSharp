@@ -7,7 +7,7 @@ using LeagueSharp.Common;
 using SharpDX;
 using Color = System.Drawing.Color;
 
-namespace OPGodKaiser.Champions
+namespace OpProject.Champions
 {
     class Karthus : CommonData
     {
@@ -16,7 +16,7 @@ namespace OPGodKaiser.Champions
             LoadSpellData();
             LoadMenu();
 
-            Game.PrintChat("<font color=\"#66CCFF\" >Kaiser's OPGodKaiserProject : </font><font color=\"#CCFFFF\" >{0}</font> - " +
+            Game.PrintChat("<font color=\"#66CCFF\" >Kaiser's OpProject : </font><font color=\"#CCFFFF\" >{0}</font> - " +
                "<font color=\"#FFFFFF\" >Version " + Assembly.GetExecutingAssembly().GetName().Version + "</font>", Player.ChampionName);
         }
 
@@ -215,9 +215,7 @@ namespace OPGodKaiser.Champions
 
         /// <Q>
         /// <param name="target"></param>
-        Vector3 a;
-        Vector3 b;
-        Vector3 c;
+
         private void CastQ(Obj_AI_Hero target)
         {
             if (!Q.IsReady() || !isValidTarget(target) || target == null)

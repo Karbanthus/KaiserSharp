@@ -7,7 +7,7 @@ using LeagueSharp;
 using LeagueSharp.Common;
 using SharpDX;
 
-namespace OPGodKaiser
+namespace OpProject.Helpers
 {
     class Initiator
     {

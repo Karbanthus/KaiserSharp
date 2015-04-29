@@ -14,10 +14,11 @@ using LeagueSharp.Common;
  * 1.0.6.0 : Add Champions Karthus
  * 1.0.6.2 : Fixed Udyr Don't work Combo
  * 1.0.6.3 : Fixed Karthus LastHit
+ * 1.1.0.0 : Add Evade,Helpers , Nunu,Morgana,Sivir
  */
 
 
-namespace OPGodKaiser
+namespace OpProject
 {
     class Program
     {
@@ -30,7 +31,7 @@ namespace OPGodKaiser
         {
             try
             {
-                var type = Type.GetType("OPGodKaiser.Champions." + ObjectManager.Player.ChampionName);
+                var type = Type.GetType("OpProject.Champions." + ObjectManager.Player.ChampionName);
 
                 if (type != null)
                 {

@@ -7,8 +7,8 @@
     <ProjectGuid>{86D19A36-99E4-435C-8543-7FBC78D84C3B}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>OPGodKaiser</RootNamespace>
-    <AssemblyName>OPGodKaiser</AssemblyName>
+    <RootNamespace>OpProject</RootNamespace>
+    <AssemblyName>OpProject</AssemblyName>
     <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -85,14 +85,22 @@
   <ItemGroup>
     <Compile Include="Champions\Amumu.cs" />
     <Compile Include="Champions\Karthus.cs" />
+    <Compile Include="Champions\Morgana.cs" />
     <Compile Include="Champions\Nautilus.cs" />
+    <Compile Include="Champions\Nunu.cs" />
+    <Compile Include="Champions\Sivir.cs" />
     <Compile Include="Champions\Udyr.cs" />
     <Compile Include="CommonData.cs" />
     <Compile Include="Champions\Vladimir.cs" />
-    <Compile Include="Initiator.cs" />
+    <Compile Include="Evade\Targeted\TargetedDetector.cs" />
+    <Compile Include="Evade\Targeted\TargetedSpellDatabase.cs" />
+    <Compile Include="Evade\Targeted\TargetSpell.cs" />
+    <Compile Include="Helpers\DamagePrediction.cs" />
+    <Compile Include="Helpers\Initiator.cs" />
     <Compile Include="Loader.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Helpers\Helper.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
