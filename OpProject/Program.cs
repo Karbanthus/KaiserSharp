@@ -15,6 +15,7 @@ using LeagueSharp.Common;
  * 1.0.6.2 : Fixed Udyr Don't work Combo
  * 1.0.6.3 : Fixed Karthus LastHit
  * 1.1.0.0 : Add Evade,Helpers , Nunu,Morgana,Sivir
+ * 1.1.0.1 : Some Helpers, Commondata Fix and Add
  */
 
 
