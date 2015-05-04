@@ -17,6 +17,7 @@ namespace OpProject.Helpers
             get { return ObjectManager.Player; }
         }
 
+
         private static bool HasTargonItem
         {
             get { return player.InventoryItems.Any(x => x.Id == ItemId.Face_of_the_Mountain || x.Id == ItemId.Relic_Shield || x.Id == ItemId.Targons_Brace); }
@@ -44,7 +45,7 @@ namespace OpProject.Helpers
 
         static Helper()
         {
-            
+
         }
 
         public static Tuple<bool, Obj_AI_Base> IsCanLastHit(Vector3 from, float range, MinionTypes _MinionType, MinionTeam _MinionTeam, MinionOrderTypes _MinionOrderType, bool _IsRanged)
@@ -91,6 +92,11 @@ namespace OpProject.Helpers
         public static IEnumerable<Obj_AI_Hero> IsEnemyInRange(float _range)
         {
             return HeroManager.Enemies.Where(x => x.IsEnemy && !x.IsDead && x.IsValid && player.Distance(x.Position) < _range);
+        }
+
+        public static IEnumerable<Obj_AI_Hero> IsEnemyInRange(float _range, Obj_AI_Hero from)
+        {
+            return HeroManager.Enemies.Where(x => x.IsEnemy && !x.IsDead && x.IsValid && from.Position.Distance(x.Position) < _range);
         }
 
         public static bool IsUnderTurret(Vector3 position, bool IsEnemyTower)

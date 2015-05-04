@@ -138,8 +138,8 @@ namespace OpProject.Champions
                 {
                     CastQ(target);
                 }
-                KSCheck(target);
             }
+            KSCheck(target);
         }
 
         private void Harass()
@@ -212,11 +212,20 @@ namespace OpProject.Champions
             if (!Q.IsReady() || !isValidTarget(target) || target == null || !ManaManager())
                 return;
 
-            var predict = Q.GetPrediction(target, true);
+            var a = Q.GetPrediction(target, true);
+            var b = target.GetWaypoints().Count;
 
-            if (predict.Hitchance >= HitChance.High)
+            if (a.Hitchance == HitChance.Immobile || a.Hitchance == HitChance.Dashing)
             {
-                Q.Cast(predict.CastPosition);
+                Q.CastIfHitchanceEquals(target, HitChance.High);
+            }
+            else if (b <= 2)
+            {
+                Q.CastIfHitchanceEquals(target, HitChance.High);
+            }
+            else if (b > 2)
+            {
+                Q.CastIfHitchanceEquals(target, HitChance.VeryHigh);
             }
         }
 
@@ -305,12 +314,10 @@ namespace OpProject.Champions
         {
             if (!unit.IsMe)
                 return;
-            //Console.WriteLine("unit :" + unit.Name);
-            //Console.WriteLine("utarget :" + target.Name);
-            
+
             if (config.Item("ComboActive", true).GetValue<KeyBind>().Active && target is Obj_AI_Hero)
                 CastW();
-            else if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear && TargetSelector.GetTarget(900, TargetSelector.DamageType.Physical) != null)
+            else if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear && TargetSelector.GetTarget(750, TargetSelector.DamageType.Physical) != null)
                 CastW();
             else if (target is Obj_AI_Hero)
                 CastW();
@@ -323,7 +330,7 @@ namespace OpProject.Champions
 
             if (spell.IsActive && spell.Sender.IsEnemy && spell.Target.IsMe)
             {
-                if (!config.Item(spell.Spell.ChampionName.ToString() + spell.Spell.Slot.ToString(), true).GetValue<bool>())
+                if (!IsFind(spell))
                     return;
 
                 if (E.IsReady())
@@ -332,6 +339,11 @@ namespace OpProject.Champions
                     CastE();
                 }
             }
+        }
+
+        private static bool IsFind(Evade.Targeted.TargetSpell args)
+        {
+            return config.Item(args.Spell.ChampionName.ToString() + args.Spell.Slot.ToString(), true).GetValue<bool>();
         }
 
         protected override void OnDraw(EventArgs args)

@@ -220,14 +220,28 @@ namespace OpProject.Champions
         {
             if (!Q.IsReady() || !isValidTarget(target) || target == null)
                 return;
-
+            /*
             var predict = Q.GetPrediction(target, true);
 
             if (predict.Hitchance >= HitChance.High)
             {
                 Q.Cast(predict.CastPosition);
+            }*/
+            var a = Q.GetPrediction(target, true);
+            var b = target.GetWaypoints().Count;
+
+            if (a.Hitchance == HitChance.Immobile || a.Hitchance == HitChance.Dashing)
+            {
+                Q.CastIfHitchanceEquals(target, HitChance.High);
             }
-            
+            else if (b <= 2)
+            {
+                Q.CastIfHitchanceEquals(target, HitChance.High);
+            }
+            else if (b > 2)
+            {
+                Q.CastIfHitchanceEquals(target, HitChance.VeryHigh);
+            }
         }
 
         private void AutoQ()

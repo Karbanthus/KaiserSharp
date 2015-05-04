@@ -245,7 +245,7 @@ namespace OpProject.Champions
         {
             if (!sender.IsMe)
                 return;
-            
+
             switch(args.SData.Name)
             {
                 case "UdyrTigerStance":

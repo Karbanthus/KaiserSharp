@@ -64,6 +64,7 @@ namespace OpProject
             Spellbook.OnCastSpell += Spellbook_OnCastSpell;
             Helpers.DamagePrediction.OnSpellDmg += DamagePrediction_OnSpellDmg;
             Evade.Targeted.TargetedDetector.TSDetector += TargetedDetector_TSDetector;
+            Obj_AI_Base.OnDamage += Obj_AI_Base_OnDamage;
 
             //Game.OnGameSendPacket += OnSendPacket;
             //Game.OnGameProcessPacket += OnProcessPacket;
@@ -345,7 +346,7 @@ namespace OpProject
             if (!config.Item("debugM").GetValue<bool>())
                 return;
 
-            Game.PrintChat("Debug-{0} : {1}",sector ,str);
+            Console.WriteLine("Debug-{0} : {1}", sector, str);
         }
 
         protected void Spelldebug(SpellSlot a)
@@ -378,6 +379,8 @@ namespace OpProject
             // Width
             var width = data.LineWidth;
             Console.WriteLine("width : " + width);
+
+            Console.WriteLine("------------------");
         }
 
         /// <summary>
@@ -501,6 +504,11 @@ namespace OpProject
 
         protected virtual void TargetedDetector_TSDetector(Evade.Targeted.TargetSpell spell)
         {
+        }
+
+        protected void Obj_AI_Base_OnDamage(AttackableUnit sender, AttackableUnitDamageEventArgs args)
+        {
+
         }
     }
 }
