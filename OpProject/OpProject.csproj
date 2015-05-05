@@ -84,10 +84,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Champions\Amumu.cs" />
+    <Compile Include="Champions\Cassiopeia.cs" />
     <Compile Include="Champions\Karthus.cs" />
     <Compile Include="Champions\Morgana.cs" />
     <Compile Include="Champions\Nautilus.cs" />
     <Compile Include="Champions\Nunu.cs" />
+    <Compile Include="Champions\Ryze.cs" />
     <Compile Include="Champions\Sivir.cs" />
     <Compile Include="Champions\Udyr.cs" />
     <Compile Include="CommonData.cs" />

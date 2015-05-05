@@ -16,6 +16,7 @@ using LeagueSharp.Common;
  * 1.0.6.3 : Fixed Karthus LastHit
  * 1.1.0.0 : Add Evade,Helpers , Nunu,Morgana,Sivir
  * 1.1.0.1 : Some Helpers, Commondata Fix and Add
+ * 1.1.2.0 : Add Champions (Ryze , Cassiopeia)
  */
 
 
@@ -40,6 +41,7 @@ namespace OpProject
                     return;
                 }
                 Game.PrintChat(ObjectManager.Player.ChampionName + " not supported");
+                Console.WriteLine(ObjectManager.Player.ChampionName + " not supported");
             }
             catch (Exception e)
             {

@@ -9,9 +9,9 @@ using Color = System.Drawing.Color;
 
 namespace OpProject.Champions
 {
-    class Morgana : CommonData
+    class Ryze : CommonData
     {
-        public Morgana()
+        public Ryze()
         {
             LoadSpellData();
             LoadMenu();
@@ -20,26 +20,28 @@ namespace OpProject.Champions
                "<font color=\"#FFFFFF\" >Version " + Assembly.GetExecutingAssembly().GetName().Version + "</font>", Player.ChampionName);
         }
 
+        private bool PassiveCount { get; set; }
+        private bool PassiveCharged { get; set; }
+
         private void LoadSpellData()
         {
-            Q = new Spell(SpellSlot.Q, 1175);
-            W = new Spell(SpellSlot.W, 900);
-            E = new Spell(SpellSlot.E, 750);
-            R = new Spell(SpellSlot.R, 600);
+            Q = new Spell(SpellSlot.Q, 900);
+            W = new Spell(SpellSlot.W, 600);
+            E = new Spell(SpellSlot.E, 600);
+            R = new Spell(SpellSlot.R);
 
-            Q.SetSkillshot(0.25f, 70f, 1200f, true, SkillshotType.SkillshotLine);
-            W.SetSkillshot(0.5f, 280f, float.MaxValue, false, SkillshotType.SkillshotCircle);
+            Q.SetSkillshot(0.25f, 50f, 2000f, true, SkillshotType.SkillshotLine); // 1700 , 2000
 
             SpellList.Add(Q);
             SpellList.Add(W);
             SpellList.Add(E);
             SpellList.Add(R);
 
-            QMana = new[] { 50, 60, 70, 80, 90 };
-            WMana = new[] { 70, 85, 100, 115, 130 };
-            EMana = new[] { 50, 50, 50, 50, 50 };
-            RMana = new[] { 100, 100, 100 };
-
+            QMana = new[] { 30, 35, 40, 45, 50 };
+            WMana = new[] { 60, 70, 80, 90, 100 };
+            EMana = new[] { 60, 70, 80, 90, 100 };
+            RMana = new[] { 0, 0, 0 };
+            
         }
 
         private void LoadMenu()
@@ -55,44 +57,19 @@ namespace OpProject.Champions
                 var Wmenu = new Menu("W", "W");
                 {
                     Wmenu.AddItem(new MenuItem("C-UseW", "Use W", true).SetValue(true));
-                    Qmenu.AddItem(new MenuItem("CheckQ", "Only Use If Q Hit", true).SetValue(true));
                     Wmenu.AddItem(new MenuItem("AutoW", "Use Auto W Immobile", true).SetValue(true));
+                    Wmenu.AddItem(new MenuItem("AutoWInTower", "Use Auto W If In tower", true).SetValue(true));
                     combomenu.AddSubMenu(Wmenu);
                 }
                 var Emenu = new Menu("E", "E");
                 {
                     Emenu.AddItem(new MenuItem("C-UseE", "Use E", true).SetValue(true));
 
-                    var EDetail = new Menu("Perfect Blockable Spells", "Perfect BLockable Spells");
-                    {
-                        foreach (Obj_AI_Hero enemyhero in ObjectManager.Get<Obj_AI_Hero>().Where(x => x.IsEnemy))
-                        {
-                            foreach (var spell in Evade.Targeted.TargetedSpellDatabase.TargetedSpellDB)
-                            {
-                                if (spell.ChampionName == enemyhero.ChampionName.ToLower())
-                                {
-                                    EDetail.AddItem(new MenuItem(spell.ChampionName.ToString() + spell.Slot.ToString(), enemyhero.ChampionName.ToString() + " - " + spell.Slot.ToString(), true)).SetValue(true);
-                                }
-                            }
-                        }
-                        Emenu.AddSubMenu(EDetail);
-                    }
-
-                    var EDetail2 = new Menu("Use for Him", "Use for Him");
-                    {
-                        foreach (Obj_AI_Hero allyhero in ObjectManager.Get<Obj_AI_Hero>().Where(x => x.IsAlly))
-                        {
-                            EDetail2.AddItem(new MenuItem(allyhero.ChampionName.ToLower().ToString(), allyhero.ChampionName.ToString(), true)).SetValue(true);
-                        }
-                        Emenu.AddSubMenu(EDetail2);
-                    }
-
                     combomenu.AddSubMenu(Emenu);
                 }
                 var Rmenu = new Menu("R", "R");
                 {
                     Rmenu.AddItem(new MenuItem("C-UseR", "Use Auto R", true).SetValue(true));
-                    Rmenu.AddItem(new MenuItem("Rcount", "Min of Enemies", true).SetValue(new Slider(2, 1, 5)));
                     combomenu.AddSubMenu(Rmenu);
                 }
                 config.AddSubMenu(combomenu);
@@ -110,13 +87,21 @@ namespace OpProject.Champions
                     Wmenu.AddItem(new MenuItem("H-UseW", "Use W", true).SetValue(true));
                     harassmenu.AddSubMenu(Wmenu);
                 }
+                var Emenu = new Menu("E", "E");
+                {
+                    Emenu.AddItem(new MenuItem("H-UseE", "Use E", true).SetValue(true));
+                    harassmenu.AddSubMenu(Emenu);
+                }
                 config.AddSubMenu(harassmenu);
             }
 
             var Farmmenu = new Menu("Farm", "Farm");
             {
-                Farmmenu.AddItem(new MenuItem("F-UseQ", "Use Q", true).SetValue(false));
-                Farmmenu.AddItem(new MenuItem("F-UseW", "Use W", true).SetValue(true));
+                Farmmenu.AddItem(new MenuItem("LH-UseQ", "LastHit Use Q", true).SetValue(true));
+                Farmmenu.AddItem(new MenuItem("F-UseQ", "Use Q", true).SetValue(true));
+                Farmmenu.AddItem(new MenuItem("F-UseW", "Use W", true).SetValue(false));
+                Farmmenu.AddItem(new MenuItem("F-UseE", "Use E", true).SetValue(true));
+                Farmmenu.AddItem(new MenuItem("F-UseR", "Use R", true).SetValue(true));
                 config.AddSubMenu(Farmmenu);
             }
 
@@ -124,7 +109,7 @@ namespace OpProject.Champions
             {
                 KSmenu.AddItem(new MenuItem("KS-UseQ", "Use Q KS", true).SetValue(true));
                 KSmenu.AddItem(new MenuItem("KS-UseW", "Use W KS", true).SetValue(true));
-                KSmenu.AddItem(new MenuItem("KS-UseR", "Use R KS", true).SetValue(false));
+                KSmenu.AddItem(new MenuItem("KS-UseE", "Use E KS", true).SetValue(true));
 
                 config.AddSubMenu(KSmenu);
             }
@@ -132,8 +117,7 @@ namespace OpProject.Champions
             var Miscmenu = new Menu("Misc", "Misc");
             {
                 Miscmenu.AddItem(new MenuItem("ManaM", "Mana Manager", true).SetValue(true));
-                Miscmenu.AddItem(new MenuItem("Use-Anti", "Use Q Antigapclose", true).SetValue(true));
-                Miscmenu.AddItem(new MenuItem("Use-Interrupt", "Use Q Interrupt", true).SetValue(true));
+                Miscmenu.AddItem(new MenuItem("Use-Anti", "Use W Antigapclose", true).SetValue(true));
 
                 config.AddSubMenu(Miscmenu);
             }
@@ -151,39 +135,52 @@ namespace OpProject.Champions
 
         private void Combo()
         {
-            var target = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
+            var Qtarget = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
+            var target = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Magical);
 
             if (config.Item("ComboActive", true).GetValue<KeyBind>().Active && target != null)
             {
-                if (config.Item("C-UseQ", true).GetValue<bool>() && Q.IsReady())
-                {
-                    CastQ(target);
-                }
-                if (config.Item("C-UseW", true).GetValue<bool>() && W.IsReady() && !config.Item("CheckQ", true).GetValue<bool>())
+                if (config.Item("C-UseW", true).GetValue<bool>() && W.IsReady())
                 {
                     CastW(target);
                 }
+                if (config.Item("C-UseQ", true).GetValue<bool>() && Q.IsReady() && !WCheck(target))
+                {
+                    CastQ(Qtarget);
+                }
+                if (config.Item("C-UseE", true).GetValue<bool>() && E.IsReady() && !WCheck(target))
+                {
+                    CastE(target);
+                }
+                if (config.Item("C-UseR", true).GetValue<bool>() && R.IsReady() && !WCheck(target) && RCheck(target))
+                {
+                    CastR();
+                }
+                if (config.Item("C-UseR", true).GetValue<bool>() && R.IsReady() && (PassiveCharged || PassiveCount || Player.Health < Player.MaxHealth * 0.3))
+                {
+                    CastR();
+                }
                 KSCheck(target);
             }
-
-            if (config.Item("C-UseR", true).GetValue<bool>() && R.IsReady())
-            {
-                CastR();
-            }
         }
-
+        
         private void Harass()
         {
-            var target = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
+            var Qtarget = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
+            var target = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Magical);
             if (config.Item("HarassActive", true).GetValue<KeyBind>().Active && target != null)
             {
                 if (config.Item("H-UseQ", true).GetValue<bool>() && Q.IsReady())
                 {
-                    CastQ(target);
+                    CastQ(Qtarget);
                 }
                 if (config.Item("H-UseW", true).GetValue<bool>() && W.IsReady())
                 {
                     CastW(target);
+                }
+                if (config.Item("H-UseE", true).GetValue<bool>() && E.IsReady())
+                {
+                    CastE(target);
                 }
                 KSCheck(target);
             }
@@ -209,12 +206,12 @@ namespace OpProject.Champions
                         CastW(target);
                     }
                 }
-                if (config.Item("KS-UseR", true).GetValue<bool>())
+                if (config.Item("KS-UseE", true).GetValue<bool>())
                 {
-                    var myDmg = Player.GetSpellDamage(target, SpellSlot.R);
+                    var myDmg = Player.GetSpellDamage(target, SpellSlot.E);
                     if (myDmg >= target.Health)
                     {
-                        CastR();
+                        CastE(target);
                     }
                 }
             }
@@ -222,35 +219,63 @@ namespace OpProject.Champions
 
         private void Farm()
         {
+            var LHUseQ = config.Item("LH-UseQ", true).GetValue<bool>();
             var UseQ = config.Item("F-UseQ", true).GetValue<bool>();
             var UseW = config.Item("F-UseW", true).GetValue<bool>();
+            var UseE = config.Item("F-UseE", true).GetValue<bool>();
+            var UseR = config.Item("F-UseR", true).GetValue<bool>();
+            var minions = MinionManager.GetMinions(W.Range, MinionTypes.All, MinionTeam.NotAlly);
 
             if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear)
             {
+                if (UseR)
+                {
+                    if (minions.Count > 5)
+                    {
+                        CastR();
+                    }
+                }
                 if (UseQ)
                 {
-                    var minions = MinionManager.GetMinions(Player.Position, W.Range, MinionTypes.All, MinionTeam.NotAlly);
-
-                    foreach (var minion in minions.Where(x => x.Health < Q.GetDamage(x) - 15))
+                    foreach (var minion in minions)
                     {
-                        Q.Cast(minion);
+                        if (HealthPrediction.GetHealthPrediction(minion, (int)(Q.Delay + Player.Distance(minion.Position) / Q.Speed)) + 15 < Q.GetDamage(minion))
+                        {
+                            CastQ(minion);
+                        }
                     }
                 }
                 if (UseW)
                 {
-                    var minions = MinionManager.GetMinions(Player.Position, Q.Range, MinionTypes.All, MinionTeam.NotAlly);
-                    List<Vector2> minionsPos = new List<Vector2>();
-
-                    foreach (var x in minions)
+                    foreach (var minion in minions)
                     {
-                        minionsPos.Add(x.Position.To2D());
+                        if (HealthPrediction.GetHealthPrediction(minion, 700) + 15 < W.GetDamage(minion))
+                        {
+                            CastW(minion);
+                        }
                     }
-
-                    var predict = MinionManager.GetBestCircularFarmLocation(minionsPos, W.Width, W.Range);
-
-                    if (predict.MinionsHit > 2)
+                }
+                if (UseE)
+                {
+                    foreach (var minion in minions)
                     {
-                        W.Cast(predict.Position);
+                        E.CastOnUnit(minion);
+                    }
+                }
+            }
+
+            if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LastHit)
+            {
+                var minionss = MinionManager.GetMinions(W.Range, MinionTypes.All, MinionTeam.NotAlly);
+
+                if (LHUseQ)
+                {
+                    foreach (var minion in minionss)
+                    {
+                        if (HealthPrediction.GetHealthPrediction(minion, (int)(Q.Delay + Player.Distance(minion.Position) / Q.Speed)) + 15 < Q.GetDamage(minion))
+                        {
+                            CastQ(minion);
+                        }
                     }
                 }
             }
@@ -264,7 +289,37 @@ namespace OpProject.Champions
             if (!Q.IsReady() || !isValidTarget(target) || target == null || !ManaManager())
                 return;
 
-            CS(target, false, Q);
+            var predict = Q.GetPrediction(target);
+            var mode = PassiveCharged ? 0 : 1;
+
+            if (mode == 1)
+            {
+                if (predict.Hitchance >= HitChance.High)
+                {
+                    Q.Cast(target);
+                }
+                else if (predict.CollisionObjects.Count > 1)
+                {
+                    Q.CastOnBestTarget();
+                }
+            }
+            else if (mode == 0)
+            {
+                Q.CastOnBestTarget();
+            }
+        }
+
+        private void CastQ(Obj_AI_Base target)
+        {
+            if (!Q.IsReady() || target == null || !ManaManager())
+                return;
+
+            var predict = Q.GetPrediction(target);
+
+            if (predict.Hitchance >= HitChance.High)
+            {
+                Q.Cast(target);
+            }
         }
 
         private void AutoQ()
@@ -276,7 +331,7 @@ namespace OpProject.Champions
             {
                 var predict = Q.GetPrediction(enemyhero, true);
 
-                if (predict.Hitchance == HitChance.Immobile)
+                if (predict.Hitchance == HitChance.Immobile && predict.CollisionObjects.Count < 1)
                 {
                     Q.Cast(enemyhero);
                 }
@@ -288,15 +343,36 @@ namespace OpProject.Champions
 
         private void CastW(Obj_AI_Hero target)
         {
-            if (!W.IsReady() || !ManaManager())
+            if (!W.IsReady() || !ManaManager() || target == null || !isValidTarget(target))
                 return;
 
-            var predict = W.GetPrediction(target, true);
-
-            if (predict.Hitchance >= HitChance.High)
+            if (Player.Distance(target.Position) < W.Range)
             {
-                W.Cast(predict.CastPosition);
+                W.CastOnUnit(target);
             }
+        }
+
+        private void CastW(Obj_AI_Base target)
+        {
+            if (!W.IsReady() || !ManaManager() || target == null)
+                return;
+
+            W.CastOnUnit(target);
+        }
+
+        private bool WCheck(Obj_AI_Hero target)
+        {
+            var status = false;
+
+            if (target != null && isValidTarget(target) && W.IsReady())
+            {
+                if (Player.Distance(target.Position) > 570 && Player.Distance(target.Position) <= 600)
+                {
+                    status = true;
+                }
+            }
+
+            return status;
         }
 
         private void AutoW()
@@ -315,6 +391,20 @@ namespace OpProject.Champions
             }
         }
 
+        private void InTower()
+        {
+            if (!config.Item("AutoWInTower", true).GetValue<bool>() || !W.IsReady())
+                return;
+
+            foreach (var enemyhero in ObjectManager.Get<Obj_AI_Hero>().Where(x => x.IsEnemy && isValidTarget(x) && !x.IsDead))
+            {
+                if (Helpers.Helper.IsUnderTurret(enemyhero, true) && Player.Distance(enemyhero.Position) < W.Range)
+                {
+                    CastW(enemyhero);
+                }
+            }
+        }
+
         /// <E>
         /// <param name="target"></param>
 
@@ -323,7 +413,10 @@ namespace OpProject.Champions
             if (!E.IsReady() || target == null || !isValidTarget(target))
                 return;
 
-            E.CastOnUnit(target);
+            if (Player.Distance(target.Position) < E.Range)
+            {
+                E.CastOnUnit(target);
+            }
         }
 
         /// <R>
@@ -334,12 +427,21 @@ namespace OpProject.Champions
             if (!R.IsReady())
                 return;
 
-            var count = config.Item("Rcount", true).GetValue<Slider>().Value;
+            R.Cast();
+        }
 
-            if (Helpers.Helper.IsEnemyInRange(R.Range - 35).Count() >= count)
+        private bool RCheck(Obj_AI_Hero target)
+        {
+            var status = false;
+
+            if (target != null && R.IsReady() && isValidTarget(target))
             {
-                R.Cast();
+                if (Helpers.Helper.IsEnemyInRange(200, target).Count() > 1)
+                {
+                    status = true;
+                }
             }
+            return status;
         }
 
         /// <Others>
@@ -359,9 +461,9 @@ namespace OpProject.Champions
                 var Rmana = R.Level == 0 ? 0 : RMana[R.Level - 1];
 
                 if (!R.IsReady())
-                    status = Helpers.Helper.ManaManager(Qmana, Wmana, Emana, Rmana, 1, 0, 1, 0);
+                    status = Helpers.Helper.ManaManager(Qmana, Wmana, Emana, Rmana, 2, 1, 1, 0);
                 else
-                    status = Helpers.Helper.ManaManager(Qmana, Wmana, Emana, Rmana, 1, 0, 1, 1);
+                    status = Helpers.Helper.ManaManager(Qmana, Wmana, Emana, Rmana, 2, 1, 1, 1);
             }
             else
             {
@@ -369,6 +471,27 @@ namespace OpProject.Champions
             }
 
             return status;
+        }
+
+        private void CheckBuff()
+        {
+            if (Player.Buffs.Any(x => x.Name.ToLower() == "ryzepassivestack" && x.Count > 3))
+            {
+                PassiveCount = true;
+            }
+            else
+            {
+                PassiveCount = false;
+            }
+
+            if (Player.Buffs.Any(x => x.Name.ToLower() == "ryzepassivecharged"))
+            {
+                PassiveCharged = true;
+            }
+            else
+            {
+                PassiveCharged = false;
+            }
         }
 
         /// <Events>
@@ -382,51 +505,32 @@ namespace OpProject.Champions
             Combo();
             Harass();
             Farm();
+
             AutoQ();
             AutoW();
+            InTower();
+
+            CheckBuff();
         }
 
         protected override void OnEnemyGapcloser(ActiveGapcloser gapcloser)
         {
-            if (!config.Item("Use-Anti", true).GetValue<bool>() || !Q.IsReady())
+            if (!config.Item("Use-Anti", true).GetValue<bool>() || !W.IsReady())
                 return;
 
-            if (Player.Distance(gapcloser.Sender.Position) < Q.Range && gapcloser.Sender.IsEnemy)
+            if (Player.Distance(gapcloser.Sender.Position) < W.Range && gapcloser.Sender.IsEnemy)
             {
-                CastQ(gapcloser.Sender);
+                CastW(gapcloser.Sender);
             }
         }
 
-        protected override void OnPossibleToInterrupt(Obj_AI_Hero sender, Interrupter2.InterruptableTargetEventArgs args)
+        protected override void OnBeforeAttack(Orbwalking.BeforeAttackEventArgs args)
         {
-            if (!sender.IsEnemy || !Q.IsReady() || !config.Item("Use-Interrupt", true).GetValue<bool>())
+            if (!config.Item("ComboActive", true).GetValue<KeyBind>().Active)
                 return;
 
-            if (args.DangerLevel == Interrupter2.DangerLevel.High && Player.Distance(sender.Position) < Q.Range)
-            {
-                CastQ(sender);
-            }
-        }
-
-        protected override void TargetedDetector_TSDetector(Evade.Targeted.TargetSpell spell)
-        {
-            if (Player.IsDead)
-                return;
-
-            if (spell.IsActive && spell.Sender.IsEnemy && (spell.Target.IsMe || spell.Target.IsAlly))
-            {
-                if (!config.Item(spell.Spell.ChampionName.ToLower().ToString() + spell.Spell.Slot.ToString(), true).GetValue<bool>())
-                    return;
-
-                if (!config.Item(spell.Target.ChampionName.ToLower().ToString(), true).GetValue<bool>())
-                    return;
-
-                if (E.IsReady() && Player.Distance(spell.Target.Position) < E.Range)
-                {
-                    debug<string>("TSDetector", spell.Spell.ChampionName + " - " + spell.Spell.Slot.ToString());
-                    CastE(spell.Target);
-                }
-            }
+            if (Q.IsReady() || W.IsReady() || E.IsReady())
+                args.Process = false;
         }
 
         protected override void OnDraw(EventArgs args)

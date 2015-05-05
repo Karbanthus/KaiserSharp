@@ -34,6 +34,12 @@ namespace OpProject
                 case "morgana":
                     new Champions.Morgana();
                     break;
+                case "ryze":
+                    new Champions.Ryze();
+                    break;
+                case "cassiopeia":
+                    new Champions.Cassiopeia();
+                    break;
 
 
                 /*

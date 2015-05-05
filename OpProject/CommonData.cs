@@ -118,7 +118,7 @@ namespace OpProject
         /// <returns></returns>
         /// 
 
-        public static bool isValidTarget(Obj_AI_Hero hero)
+        public static bool isValidTarget(Obj_AI_Base hero)
         {
             if (hero.IsValid && !hero.IsDead && hero.IsVisible && !isUntargetable(hero))
             {
@@ -130,7 +130,7 @@ namespace OpProject
             }
         }
 
-        private static bool isUntargetable(Obj_AI_Hero hero)
+        private static bool isUntargetable(Obj_AI_Base hero)
         {
             var untargetable = false;
 
@@ -222,6 +222,28 @@ namespace OpProject
             }
 
             return PowerInfo.Champion;
+        }
+
+        protected void CS(Obj_AI_Base target, bool aoe, Spell spell)
+        {
+            if (target == null || target.IsDead || !isValidTarget(target))
+                return;
+
+            var a = spell.GetPrediction(target, aoe);
+            var b = target.GetWaypoints().Count;
+
+            if (a.Hitchance == HitChance.Immobile || a.Hitchance == HitChance.Dashing)
+            {
+                spell.CastIfHitchanceEquals(target, HitChance.High);
+            }
+            else if (b <= 2)
+            {
+                spell.CastIfHitchanceEquals(target, HitChance.High);
+            }
+            else if (b > 2)
+            {
+                spell.CastIfHitchanceEquals(target, HitChance.VeryHigh);
+            }
         }
 
         /// <Collision>
