@@ -12,8 +12,6 @@ namespace OpProject
 {
     class CommonData
     {
-        //protected static readonly Obj_AI_Hero Player = ObjectManager.Player;
-        
         public Obj_AI_Hero Player
         {
             get { return ObjectManager.Player; }
@@ -21,9 +19,9 @@ namespace OpProject
 
         //Spells
         protected Spell Q { get; set; }
-        protected Spell W;
-        protected Spell E;
-        protected Spell R;
+        protected Spell W { get; set; }
+        protected Spell E { get; set; }
+        protected Spell R { get; set; }
         protected readonly List<Spell> SpellList = new List<Spell>();
 
         protected SpellSlot IgniteSlot = ObjectManager.Player.GetSpellSlot("SummonerDot");
@@ -65,9 +63,8 @@ namespace OpProject
             Helpers.DamagePrediction.OnSpellDmg += DamagePrediction_OnSpellDmg;
             Evade.Targeted.TargetedDetector.TSDetector += TargetedDetector_TSDetector;
             Obj_AI_Base.OnDamage += Obj_AI_Base_OnDamage;
-
-            //Game.OnGameSendPacket += OnSendPacket;
-            //Game.OnGameProcessPacket += OnProcessPacket;
+            Game.OnProcessPacket += Game_OnProcessPacket;
+            Game.OnSendPacket += Game_OnSendPacket;
         }
 
         protected virtual void SpecialMenu()
@@ -410,11 +407,11 @@ namespace OpProject
         /// </summary>
         /// <param name="args"></param>
 
-        protected virtual void OnProcessPacket(GamePacketEventArgs args)
+        protected virtual void Game_OnProcessPacket(GamePacketEventArgs args)
         {
         }
 
-        protected virtual void OnSendPacket(GamePacketEventArgs args)
+        protected virtual void Game_OnSendPacket(GamePacketEventArgs args)
         {
         }
 

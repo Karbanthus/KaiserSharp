@@ -64,6 +64,7 @@ namespace OpProject.Champions
                 var Emenu = new Menu("E", "E");
                 {
                     Emenu.AddItem(new MenuItem("C-UseE", "Use E", true).SetValue(true));
+                    Emenu.AddItem(new MenuItem("AutoE", "Auto Use E Enemy Has Poison", true).SetValue(true));
                     Emenu.AddItem(new MenuItem("UseEOnlyPosion", "Use E Only Enemey has Posion", true).SetValue(true));
                     Emenu.AddItem(new MenuItem("EDelay", "E Delay (ms)", true).SetValue<Slider>(new Slider(700, 0, 2000)));
                     combomenu.AddSubMenu(Emenu);
@@ -248,7 +249,7 @@ namespace OpProject.Champions
                 case Orbwalking.OrbwalkingMode.LastHit:
                     var LHMinions = MinionManager.GetMinions(Q.Range, MinionTypes.All, MinionTeam.Enemy);
                     
-                    if (LHUseQ && Q.IsReady())
+                    if (Q.IsReady())
                     {
                         if (LHUseQE && E.IsReady())
                         {
@@ -261,7 +262,7 @@ namespace OpProject.Champions
                                 }
                             }
                         }
-                        else
+                        else if (LHUseQ)
                         {
                             foreach (var minion in LHMinions.Where(x => HealthPrediction.GetHealthPrediction(x, (int)(Q.Delay + Player.Distance(x.Position) / Q.Speed)) + 15 < Q.GetDamage(x) && !x.IsDead))
                             {
@@ -410,6 +411,20 @@ namespace OpProject.Champions
             else
             {
                 E.CastOnUnit(target);
+            }
+        }
+
+        private void AutoE()
+        {
+            if (!config.Item("AutoE", true).GetValue<bool>() || !E.IsReady())
+                return;
+
+            foreach (var enemyhero in ObjectManager.Get<Obj_AI_Hero>().Where(x => x.IsEnemy && isValidTarget(x) && Player.Distance(x.Position) < E.Range))
+            {
+                if (CheckPoison(enemyhero))
+                {
+                    E.CastOnUnit(enemyhero);
+                }
             }
         }
 
