@@ -229,9 +229,9 @@ namespace OpProject
             var a = spell.GetPrediction(target, aoe);
             var b = target.GetWaypoints().Count;
 
-            if (a.Hitchance == HitChance.Immobile || a.Hitchance == HitChance.Dashing)
+            if (a.Hitchance == HitChance.Immobile)
             {
-                spell.CastIfHitchanceEquals(target, HitChance.High);
+                spell.Cast(target);
             }
             else if (b <= 2)
             {

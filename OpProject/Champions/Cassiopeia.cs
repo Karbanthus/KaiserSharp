@@ -24,12 +24,12 @@ namespace OpProject.Champions
 
         private void LoadSpellData()
         {
-            Q = new Spell(SpellSlot.Q, 850);
-            W = new Spell(SpellSlot.W, 850);
+            Q = new Spell(SpellSlot.Q, 825);
+            W = new Spell(SpellSlot.W, 825);
             E = new Spell(SpellSlot.E, 700);
             R = new Spell(SpellSlot.R, 825);
 
-            Q.SetSkillshot(0.6f, 50f, float.MaxValue, false, SkillshotType.SkillshotCircle);
+            Q.SetSkillshot(0.6f, 40f, float.MaxValue, false, SkillshotType.SkillshotCircle);
             W.SetSkillshot(0.25f, 125f, float.MaxValue, false, SkillshotType.SkillshotCircle);
             E.SetTargetted(0.25f, float.MaxValue);
             R.SetSkillshot(0.5f, (float)(80 * Math.PI / 180), float.MaxValue, false, SkillshotType.SkillshotCone);
@@ -165,7 +165,7 @@ namespace OpProject.Champions
                 {
                     CastQ(target);
                 }
-                if (config.Item("C-UseW", true).GetValue<bool>() && W.IsReady())
+                if (config.Item("C-UseW", true).GetValue<bool>() && W.IsReady() && !CheckPoison(target) && !Q.IsReady())
                 {
                     CastW(target);
                 }
@@ -177,8 +177,8 @@ namespace OpProject.Champions
                 {
                     CastR();
                 }
-                KSCheck(target);
             }
+            KSCheck(target);
         }
 
         private void Harass()
@@ -205,7 +205,7 @@ namespace OpProject.Champions
 
         private void KSCheck(Obj_AI_Hero target)
         {
-            if (target != null && target.Type == Player.Type)
+            if (target != null)
             {
                 if (config.Item("KS-UseQ", true).GetValue<bool>())
                 {
@@ -226,9 +226,11 @@ namespace OpProject.Champions
                 if (config.Item("KS-UseE", true).GetValue<bool>() && !Q.IsReady() && !W.IsReady())
                 {
                     var myDmg = Player.GetSpellDamage(target, SpellSlot.E);
-                    if (myDmg >= target.Health)
+                    if (myDmg >= target.Health && 
+                        Player.Distance(target.Position) <= E.Range &&
+                        Helpers.Helper.IsEnemyInRange(800).Count() < 1)
                     {
-                        CastE(target);
+                        E.CastOnUnit(target);
                     }
                 }
             }
@@ -373,7 +375,7 @@ namespace OpProject.Champions
             {
                 var predict = Q.GetPrediction(enemyhero, true);
 
-                if (predict.Hitchance == HitChance.Immobile && predict.CollisionObjects.Count < 1)
+                if (predict.Hitchance == HitChance.Immobile)
                 {
                     Q.Cast(enemyhero);
                 }
@@ -475,9 +477,9 @@ namespace OpProject.Champions
 
                 if (R.WillHit(enemyhero, predict.CastPosition))
                 {
-                    //Rcount += 1;
-                    //target = enemyhero;
-                    if (Player.IsFacing(enemyhero))
+                    Rcount += 1;
+                    target = enemyhero;
+                    if (enemyhero.IsFacing(Player))
                     {
                         IsFacingCount += 1;
                     }
@@ -486,18 +488,6 @@ namespace OpProject.Champions
                     {
                         KillableCount += 1;
                     }
-
-                    if (Rcount == 0)
-                    {
-                        Rcount = predict.AoeTargetsHitCount;
-                        target = enemyhero;
-                    }
-                    else if (predict.AoeTargetsHitCount > Rcount)
-                    {
-                        Rcount = predict.AoeTargetsHitCount;
-                        target = enemyhero;
-                    }
-                    
                 }
             }
 
