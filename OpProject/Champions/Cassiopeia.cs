@@ -552,6 +552,7 @@ namespace OpProject.Champions
             }
 
             AutoQ();
+            AutoE();
         }
 
         protected override void OnBeforeAttack(Orbwalking.BeforeAttackEventArgs args)

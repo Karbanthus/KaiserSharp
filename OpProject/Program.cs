@@ -17,6 +17,8 @@ using LeagueSharp.Common;
  * 1.1.0.0 : Add Evade,Helpers , Nunu,Morgana,Sivir
  * 1.1.0.1 : Some Helpers, Commondata Fix and Add
  * 1.1.2.0 : Add Champions (Ryze , Cassiopeia)
+ * 1.1.2.1 : Fixed Cassiopeia Farm and Add AutoE
+ * 1.1.2.2 : Fixed Cassiopeia AutoE
  */
 
 
