@@ -19,6 +19,7 @@ using LeagueSharp.Common;
  * 1.1.2.0 : Add Champions (Ryze , Cassiopeia)
  * 1.1.2.1 : Fixed Cassiopeia Farm and Add AutoE
  * 1.1.2.2 : Fixed Cassiopeia AutoE
+ * 1.1.2.3 : Fixed Ryze W Farm
  */
 
 

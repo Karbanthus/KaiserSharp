@@ -11,6 +11,8 @@ namespace OpProject.Champions
 {
     class Ryze : CommonData
     {
+        #region Init
+
         public Ryze()
         {
             LoadSpellData();
@@ -22,6 +24,8 @@ namespace OpProject.Champions
 
         private bool PassiveCount { get; set; }
         private bool PassiveCharged { get; set; }
+
+        #region SkillData
 
         private void LoadSpellData()
         {
@@ -43,6 +47,10 @@ namespace OpProject.Champions
             RMana = new[] { 0, 0, 0 };
             
         }
+
+        #endregion
+
+        #region Menu
 
         private void LoadMenu()
         {
@@ -132,6 +140,12 @@ namespace OpProject.Champions
                 config.AddSubMenu(Drawingmenu);
             }
         }
+
+        #endregion
+
+        #endregion
+
+        #region Logic
 
         private void Combo()
         {
@@ -249,7 +263,7 @@ namespace OpProject.Champions
                 {
                     foreach (var minion in minions)
                     {
-                        if (HealthPrediction.GetHealthPrediction(minion, 700) + 15 < W.GetDamage(minion))
+                        if (minion.Health + 15 < W.GetDamage(minion))
                         {
                             CastW(minion);
                         }
@@ -281,8 +295,9 @@ namespace OpProject.Champions
             }
         }
 
-        /// <Q>
-        /// <param name="target"></param>
+        #endregion
+
+        #region Q
 
         private void CastQ(Obj_AI_Hero target)
         {
@@ -338,8 +353,9 @@ namespace OpProject.Champions
             }
         }
 
-        /// <W>
-        /// <param name="target"></param>
+        #endregion 
+
+        #region W
 
         private void CastW(Obj_AI_Hero target)
         {
@@ -405,8 +421,9 @@ namespace OpProject.Champions
             }
         }
 
-        /// <E>
-        /// <param name="target"></param>
+        #endregion
+
+        #region E
 
         private void CastE(Obj_AI_Hero target)
         {
@@ -419,8 +436,9 @@ namespace OpProject.Champions
             }
         }
 
-        /// <R>
-        /// <returns></returns>
+        #endregion
+
+        #region R
 
         private void CastR()
         {
@@ -444,10 +462,9 @@ namespace OpProject.Champions
             return status;
         }
 
-        /// <Others>
-        ///     Others
-        /// </summary>
-        /// <returns></returns>
+        #endregion
+
+        #region others
 
         private bool ManaManager()
         {
@@ -494,8 +511,9 @@ namespace OpProject.Champions
             }
         }
 
-        /// <Events>
-        /// <param name="args"></param>
+        #endregion
+
+        #region Events
 
         protected override void OnUpdate(EventArgs args)
         {
@@ -572,6 +590,8 @@ namespace OpProject.Champions
 
             base.Drawing_OnEndScene(args);
         }
+
+        #endregion
 
     }
 }
