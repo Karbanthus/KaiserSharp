@@ -10,12 +10,13 @@ namespace StealthDetector
     {
         static void Main(string[] args)
         {
-            CustomEvents.Game.OnGameLoad += Game_OnGameLoad;
+            CustomEvents.Game.OnGameLoad += Game_OnGameLoad;  
         }
 
         static Menu config;
         static List<Spells> SpellList = new List<Spells>();
         static int Delay = 0;
+        static float VayneBuffEndTime = 0;
 
         public struct Spells
         {
@@ -28,6 +29,7 @@ namespace StealthDetector
         {
             Obj_AI_Base.OnCreate += Obj_AI_Base_OnCreate;
             Obj_AI_Base.OnProcessSpellCast += Obj_AI_Base_OnProcessSpellCast;
+            Game.OnUpdate += Game_OnUpdate;
 
             SpellList.Add(new Spells { ChampionName = "akali", SpellName = "akalismokebomb", slot = SpellSlot.W });   //Akali W
             SpellList.Add(new Spells { ChampionName = "shaco", SpellName = "deceive", slot = SpellSlot.Q }); //Shaco Q
@@ -35,8 +37,24 @@ namespace StealthDetector
             SpellList.Add(new Spells { ChampionName = "khazix", SpellName = "khazixrlong", slot = SpellSlot.R }); //Khazix R Evolved
             SpellList.Add(new Spells { ChampionName = "talon", SpellName = "talonshadowassault", slot = SpellSlot.R }); //Talon R
             SpellList.Add(new Spells { ChampionName = "monkeyking", SpellName = "monkeykingdecoy", slot = SpellSlot.W }); //Wukong W
+            SpellList.Add(new Spells { ChampionName = "vayne", SpellName = "vaynetumble", slot = SpellSlot.Q }); //Vayne R-Q
 
             Menu();
+        }
+
+        static void Game_OnUpdate(EventArgs args)
+        {
+            var Vayne = HeroManager.Enemies.Find(x => x.ChampionName.ToLower() == "vayne");
+
+            if (Vayne == null)
+                return;
+
+            foreach (var hero in ObjectManager.Get<Obj_AI_Hero>().Where(x => x.IsEnemy &&
+                x.ChampionName.ToLower().Contains("vayne") &&
+                x.Buffs.Any(y => y.Name == "VayneInquisition")))
+            {
+                VayneBuffEndTime = hero.Buffs.First(x => x.Name == "VayneInquisition").EndTime;
+            }
         }
 
         static void Menu()
@@ -92,6 +110,9 @@ namespace StealthDetector
                     return;
 
                 if (ObjectManager.Player.Distance(sender.Position) > 700)
+                    return;
+
+                if (args.SData.Name.ToLower().Contains("vaynetumble") && Game.Time > VayneBuffEndTime)
                     return;
 
                 if (Environment.TickCount - Delay > 1500 || Delay == 0)
