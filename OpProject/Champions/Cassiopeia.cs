@@ -11,6 +11,8 @@ namespace OpProject.Champions
 {
     class Cassiopeia : CommonData
     {
+        #region Init
+
         public Cassiopeia()
         {
             LoadSpellData();
@@ -29,11 +31,11 @@ namespace OpProject.Champions
             E = new Spell(SpellSlot.E, 700);
             R = new Spell(SpellSlot.R, 825);
 
-            Q.SetSkillshot(0.6f, 40f, float.MaxValue, false, SkillshotType.SkillshotCircle);
+            Q.SetSkillshot(0.6f, 140f, float.MaxValue, false, SkillshotType.SkillshotCircle);
             W.SetSkillshot(0.25f, 125f, float.MaxValue, false, SkillshotType.SkillshotCircle);
             E.SetTargetted(0.25f, float.MaxValue);
             R.SetSkillshot(0.5f, (float)(80 * Math.PI / 180), float.MaxValue, false, SkillshotType.SkillshotCone);
-            
+
             SpellList.Add(Q);
             SpellList.Add(W);
             SpellList.Add(E);
@@ -43,7 +45,6 @@ namespace OpProject.Champions
             WMana = new[] { 40, 50, 60, 70, 80 };
             EMana = new[] { 50, 60, 70, 80, 90 };
             RMana = new[] { 100, 100, 100 };
-
         }
 
         private void LoadMenu()
@@ -155,6 +156,10 @@ namespace OpProject.Champions
             }
         }
 
+        #endregion
+
+        #region Logic
+
         private void Combo()
         {
             var target = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
@@ -178,6 +183,7 @@ namespace OpProject.Champions
                     CastR();
                 }
             }
+
             KSCheck(target);
         }
 
@@ -355,15 +361,22 @@ namespace OpProject.Champions
             }
         }
 
-        /// <Q>
-        /// <param name="target"></param>
+        #endregion
+
+        #region Q
 
         private void CastQ(Obj_AI_Base target)
         {
             if (!Q.IsReady() || !isValidTarget(target) || target == null || !ManaManager())
                 return;
 
-            CS(target, true, Q);
+            var predict = Q.GetPrediction(target, true);
+
+            if (predict.Hitchance >= HitChance.High &&
+                Player.Distance(target.ServerPosition) < Q.Range)
+            {
+                Q.CastIfHitchanceEquals(target, HitChance.High);
+            }
         }
 
         private void AutoQ()
@@ -382,19 +395,27 @@ namespace OpProject.Champions
             }
         }
 
-        /// <W>
-        /// <param name="target"></param>
+        #endregion
+
+        #region W
 
         private void CastW(Obj_AI_Base target)
         {
             if (!W.IsReady() || !ManaManager() || target == null || !isValidTarget(target))
                 return;
 
-            CS(target, true, W);
+            var predict = W.GetPrediction(target, true);
+
+            if (predict.Hitchance >= HitChance.High &&
+                Player.Distance(target.ServerPosition) < W.Range)
+            {
+                W.CastIfHitchanceEquals(target, HitChance.High);
+            }
         }
 
-        /// <E>
-        /// <param name="target"></param>
+        #endregion
+
+        #region E
 
         private void CastE(Obj_AI_Base target)
         {
@@ -430,8 +451,9 @@ namespace OpProject.Champions
             }
         }
 
-        /// <R>
-        /// <returns></returns>
+        #endregion
+
+        #region R
 
         private void CastR()
         {
@@ -471,33 +493,42 @@ namespace OpProject.Champions
             var KillableCount = 0;
             Obj_AI_Hero target = null;
 
-            foreach(var enemyhero in ObjectManager.Get<Obj_AI_Hero>().Where(x => x.IsEnemy && Player.Distance(x.Position) < 1200 && isValidTarget(x)))
+            foreach(var enemyhero in ObjectManager.Get<Obj_AI_Hero>().Where(x => x.IsEnemy && 
+                Player.Distance(x.ServerPosition) < R.Range && 
+                isValidTarget(x) &&
+                !x.IsDead))
             {
                 var predict = R.GetPrediction(enemyhero, true);
-
-                if (R.WillHit(enemyhero, predict.CastPosition))
+                var tmpCount = predict.AoeTargetsHitCount;
+                
+                if (enemyhero.IsFacing(Player))
                 {
-                    Rcount += 1;
-                    target = enemyhero;
-                    if (enemyhero.IsFacing(Player))
-                    {
-                        IsFacingCount += 1;
-                    }
+                    IsFacingCount += 1;
+                }
 
-                    if (R.GetDamage(enemyhero) > enemyhero.Health)
-                    {
-                        KillableCount += 1;
-                    }
+                if (enemyhero.Health + 30 < R.GetDamage(enemyhero))
+                {
+                    KillableCount += 1;
+                }
+
+                if (target == null && Rcount == 0)
+                {
+                    target = enemyhero;
+                    Rcount = tmpCount;
+                }
+                else if (tmpCount > Rcount)
+                {
+                    target = enemyhero;
+                    Rcount = tmpCount;
                 }
             }
 
             return new Tuple<Obj_AI_Hero, int, int, int>(target, Rcount, IsFacingCount, KillableCount);
         }
 
-        /// <Others>
-        ///     Others
-        /// </summary>
-        /// <returns></returns>
+        #endregion
+
+        #region Others
 
         private bool ManaManager()
         {
@@ -535,8 +566,9 @@ namespace OpProject.Champions
             return status;
         }
 
-        /// <Events>
-        /// <param name="args"></param>
+        #endregion
+
+        #region Events
 
         protected override void OnUpdate(EventArgs args)
         {
@@ -671,5 +703,6 @@ namespace OpProject.Champions
             base.Drawing_OnEndScene(args);
         }
 
+        #endregion
     }
 }

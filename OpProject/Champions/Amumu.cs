@@ -146,7 +146,7 @@ namespace OpProject.Champions
                 if (config.Item("KS-UseR", true).GetValue<bool>() && Rtarget != null)
                 {
                     var myDmg = Player.GetSpellDamage(Rtarget, SpellSlot.R);
-                    if (myDmg >= Rtarget.Health && Player.Distance(Rtarget) < R.Range - 15)
+                    if (myDmg >= Rtarget.Health && Player.Distance(Rtarget.ServerPosition) < R.Range - 15)
                     {
                         R.Cast();
                     }
@@ -163,7 +163,8 @@ namespace OpProject.Champions
 
             var predict = Q.GetPrediction(target);
 
-            if (predict.Hitchance >= HitChance.High)
+            if (predict.Hitchance >= HitChance.High &&
+                Player.Distance(target.ServerPosition) < Q.Range)
             {
                 Q.Cast(target);
             }

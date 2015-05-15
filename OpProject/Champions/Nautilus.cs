@@ -112,7 +112,7 @@ namespace OpProject.Champions
                 {
                     CastQ(target);
                 }
-                if (!Q.IsReady() && !E.IsReady() && config.Item("C-UseW", true).GetValue<bool>() && W.IsReady() && Player.Distance(target) < 700)
+                if (!Q.IsReady() && !E.IsReady() && config.Item("C-UseW", true).GetValue<bool>() && W.IsReady() && Player.Distance(target.ServerPosition) < 700)
                 {
                     CastW();
                 }

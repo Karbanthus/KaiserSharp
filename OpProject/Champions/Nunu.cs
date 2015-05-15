@@ -30,8 +30,6 @@ namespace OpProject.Champions
             SpellList.Add(E);
             SpellList.Add(R);
 
-            Spell Smite = null;
-
             if (Player.Spellbook.GetSpell(SpellSlot.Summoner1).Name.ToLower().Contains("smite") || Player.Spellbook.GetSpell(SpellSlot.Summoner2).Name.ToLower().Contains("smite"))
             {
                 Console.WriteLine("SmiteName : " + Player.Spellbook.GetSpell(SpellSlot.Summoner1).Name);
