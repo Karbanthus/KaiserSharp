@@ -115,6 +115,12 @@ namespace StealthDetector
                 if (args.SData.Name.ToLower().Contains("vaynetumble") && Game.Time > VayneBuffEndTime)
                     return;
 
+                if (Items.CanUseItem(3364) && Items.HasItem(3364, ObjectManager.Player))
+                {
+                    ObjectManager.Player.Spellbook.CastSpell(CheckSlot());
+                    return;
+                }
+                
                 if (Environment.TickCount - Delay > 1500 || Delay == 0)
                 {
                     var pos = ObjectManager.Player.Distance(args.End) > 600 ? ObjectManager.Player.Position : args.End;
@@ -150,7 +156,14 @@ namespace StealthDetector
                 !Rengar.IsDead &&
                     CheckSlot() != SpellSlot.Unknown)
                 {
-                    ObjectManager.Player.Spellbook.CastSpell(CheckSlot(), ObjectManager.Player.Position);
+                    if (Items.CanUseItem(3364) && Items.HasItem(3364, ObjectManager.Player))
+                    {
+                        ObjectManager.Player.Spellbook.CastSpell(CheckSlot());
+                    }
+                    else
+                    {
+                        ObjectManager.Player.Spellbook.CastSpell(CheckSlot(), ObjectManager.Player.Position);
+                    }
                 }
             }
         }
@@ -166,6 +179,10 @@ namespace StealthDetector
             else if (Items.CanUseItem(2043) && Items.HasItem(2043, ObjectManager.Player))
             {
                 slot = ObjectManager.Player.GetSpellSlot("VisionWard");
+            }
+            else if (Items.CanUseItem(3364) && Items.HasItem(3364, ObjectManager.Player))
+            {
+                slot = SpellSlot.Trinket;
             }
             return slot;
         }
