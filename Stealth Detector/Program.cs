@@ -63,7 +63,8 @@ namespace StealthDetector
 
             var Detector = new Menu("Stealth Detector", "Stealth Detector");
             {
-                Detector.AddItem(new MenuItem("Use", "Use Vision Ward On Combo").SetValue(new KeyBind(32, KeyBindType.Press)));
+                Detector.AddItem(new MenuItem("Always", "Always Use Detector").SetValue<bool>(false));
+                Detector.AddItem(new MenuItem("Use", "Use Detector On Combo").SetValue(new KeyBind(32, KeyBindType.Press)));
                 var Detector2 = new Menu("Track Him", "Track Him");
                 {
                     foreach (var hero in ObjectManager.Get<Obj_AI_Hero>().Where(x => x.IsEnemy))
@@ -90,7 +91,7 @@ namespace StealthDetector
 
         static void Obj_AI_Base_OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
         {
-            if (!config.Item("Use").GetValue<KeyBind>().Active)
+            if (!config.Item("Use").GetValue<KeyBind>().Active && !config.Item("Always").GetValue<bool>())
                 return;
 
             if (!sender.IsEnemy || sender.IsDead || !(sender is Obj_AI_Hero))
@@ -114,12 +115,6 @@ namespace StealthDetector
 
                 if (args.SData.Name.ToLower().Contains("vaynetumble") && Game.Time > VayneBuffEndTime)
                     return;
-
-                if (Items.CanUseItem(3364) && Items.HasItem(3364, ObjectManager.Player))
-                {
-                    ObjectManager.Player.Spellbook.CastSpell(CheckSlot());
-                    return;
-                }
                 
                 if (Environment.TickCount - Delay > 1500 || Delay == 0)
                 {
@@ -132,7 +127,7 @@ namespace StealthDetector
 
         static void Obj_AI_Base_OnCreate(GameObject sender, EventArgs args)
         {
-            if (!config.Item("Use").GetValue<KeyBind>().Active)
+            if (!config.Item("Use").GetValue<KeyBind>().Active && !config.Item("Always").GetValue<bool>())
                 return;
 
             var Rengar = HeroManager.Enemies.Find(x => x.ChampionName.ToLower() == "rengar");
@@ -143,7 +138,7 @@ namespace StealthDetector
             if (!config.Item("RengarR").GetValue<bool>())
                 return;
 
-            if (ObjectManager.Player.Distance(sender.Position) < 1500)
+            if (ObjectManager.Player.Distance(sender.Position) < 1600)
             {
                 Console.WriteLine("Sender : " + sender.Name);
             }
@@ -156,14 +151,7 @@ namespace StealthDetector
                 !Rengar.IsDead &&
                     CheckSlot() != SpellSlot.Unknown)
                 {
-                    if (Items.CanUseItem(3364) && Items.HasItem(3364, ObjectManager.Player))
-                    {
-                        ObjectManager.Player.Spellbook.CastSpell(CheckSlot());
-                    }
-                    else
-                    {
-                        ObjectManager.Player.Spellbook.CastSpell(CheckSlot(), ObjectManager.Player.Position);
-                    }
+                    ObjectManager.Player.Spellbook.CastSpell(CheckSlot(), ObjectManager.Player.Position);
                 }
             }
         }
