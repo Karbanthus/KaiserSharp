@@ -31,8 +31,8 @@ namespace OpProject.Champions
             E = new Spell(SpellSlot.E, 700);
             R = new Spell(SpellSlot.R, 825);
 
-            Q.SetSkillshot(0.6f, 140f, float.MaxValue, false, SkillshotType.SkillshotCircle);
-            W.SetSkillshot(0.25f, 125f, float.MaxValue, false, SkillshotType.SkillshotCircle);
+            Q.SetSkillshot(0.6f, 75f, float.MaxValue, false, SkillshotType.SkillshotCircle);
+            W.SetSkillshot(0.25f,90f, float.MaxValue, false, SkillshotType.SkillshotCircle);
             E.SetTargetted(0.25f, float.MaxValue);
             R.SetSkillshot(0.5f, (float)(80 * Math.PI / 180), float.MaxValue, false, SkillshotType.SkillshotCone);
 
@@ -375,7 +375,7 @@ namespace OpProject.Champions
             if (predict.Hitchance >= HitChance.High &&
                 Player.Distance(target.ServerPosition) < Q.Range)
             {
-                Q.CastIfHitchanceEquals(target, HitChance.High);
+                Q.Cast(predict.CastPosition);
             }
         }
 
