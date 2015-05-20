@@ -68,16 +68,16 @@ namespace ThreshTherulerofthesoul
             EscapeSpells.Add("VayneQ"); // Vayne Q
             EscapeSpells.Add("ShacoQ"); // shaco Q
 
-            EscapeSpells.Add("GragasE"); // Leblanc
-            EscapeSpells.Add("GragasE"); // Shyvana
-            EscapeSpells.Add("GragasE"); // Ahri
-            EscapeSpells.Add("GragasE"); // Zac
-            EscapeSpells.Add("GragasE"); // Jax Q
-            EscapeSpells.Add("GragasE"); // Ziqs W
-            EscapeSpells.Add("GragasE"); // Kassadin R
-            EscapeSpells.Add("GragasE"); // Cayitlyn E
-            EscapeSpells.Add("GragasE"); // Queen
-            EscapeSpells.Add("GragasE"); // Hecarim R
+            // Leblanc
+            // Shyvana
+            // Ahri
+            // Zac
+            // Jax Q
+            // Ziqs W
+            // Kassadin R
+            // Cayitlyn E
+            // Queen
+            // Hecarim R
 
             #endregion
         }
@@ -88,7 +88,7 @@ namespace ThreshTherulerofthesoul
 
             if (OnDetectEscape == null)
                 return;
-            //Console.WriteLine("hi");
+
             foreach (var a in ActiveEscapeSpells)
             {
                 OnDetectEscape(a.Sender, a);
