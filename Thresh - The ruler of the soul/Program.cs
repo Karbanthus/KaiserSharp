@@ -103,6 +103,7 @@ namespace ThreshTherulerofthesoul
                     combomenu.AddSubMenu(Rmenu);
                 }
                 combomenu.AddItem(new MenuItem("ComboActive", "Combo", true).SetValue(new KeyBind(32, KeyBindType.Press)));
+                combomenu.AddItem(new MenuItem("FlayPush", "Flay Push Key", true).SetValue(new KeyBind("H".ToCharArray()[0], KeyBindType.Press)));
                 config.AddSubMenu(combomenu);
             }
 
@@ -175,7 +176,7 @@ namespace ThreshTherulerofthesoul
             var target = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
             var Etarget = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Magical);
 
-            if (config.Item("ComboActive", true).GetValue<KeyBind>().Active)
+            if (config.IsActive("ComboActive"))
             {
                 if (target != null)
                 {
@@ -183,11 +184,11 @@ namespace ThreshTherulerofthesoul
                     {
                         CastCatchedLatern();
                     }
-                    if (config.Item("C-UseQ", true).GetValue<bool>() && Q.IsReady())
+                    if (config.IsBool("C-UseQ") && Q.IsReady())
                     {
                         CastQ(target);
                     }
-                    if (config.Item("C-UseSW", true).GetValue<bool>() && W.IsReady())
+                    if (config.IsBool("C-UseSW") && W.IsReady())
                     {
                         ShieldLantern();
                     }
@@ -196,16 +197,22 @@ namespace ThreshTherulerofthesoul
 
                 if (Etarget != null)
                 {
-                    if (config.Item("C-UseE", true).GetValue<bool>() && E.IsReady())
+                    if (config.IsBool("C-UseE") && E.IsReady())
                     {
                         CastE(Etarget);
                     }
                 }
             }
 
-            if (Menubool("Use-SafeLantern"))
+            if (config.IsBool("Use-SafeLantern"))
             {
                 SafeLantern();
+            }
+
+            if (config.IsActive("FlayPush") && Etarget != null && 
+                E.IsReady())
+            {
+                Push(Etarget);
             }
         }
 
@@ -215,16 +222,16 @@ namespace ThreshTherulerofthesoul
             var Etarget = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Magical);
             var mana = config.Item("Mana", true).GetValue<Slider>().Value;
 
-            if (Helper.GetManaPer(Player) < mana)
+            if (Player.ManaPercents() < mana)
                 return;
 
-            if (config.Item("HarassActive", true).GetValue<KeyBind>().Active)
+            if (config.IsActive("HarassActive"))
             {
-                if (config.Item("H-UseE", true).GetValue<bool>() && E.IsReady() && Etarget != null)
+                if (config.IsBool("H-UseE") && E.IsReady() && Etarget != null)
                 {
                     CastE(Etarget);
                 }
-                if (config.Item("H-UseQ", true).GetValue<bool>() && Q.IsReady() && target != null)
+                if (config.IsBool("H-UseQ") && Q.IsReady() && target != null)
                 {
                     CastQ(target);
                 }
@@ -508,7 +515,7 @@ namespace ThreshTherulerofthesoul
                 Player.Distance(x.Position) < 1500 && 
                 !x.HasBuff("Recall")))
             {
-                if (Helper.GetHealthPer(hero) < 25)
+                if (hero.HpPercents() < 25)
                 {
                     if (Player.Distance(hero.Position) <= W.Range)
                     {
@@ -546,8 +553,8 @@ namespace ThreshTherulerofthesoul
             {
                 if (Player.Distance(target.Position) <= E.Range)
                 {
-                    if (Helper.GetHealthPer(Player) < 20 && 
-                        Helper.GetHealthPer(target) > 20)
+                    if (Player.HpPercents() < 20 && 
+                        target.HpPercents() > 20)
                     {
                         Push(target);
                     }
@@ -662,14 +669,9 @@ namespace ThreshTherulerofthesoul
             return status;
         }
 
-        static bool Menubool(string s)
-        {
-            return config.Item(s, true).GetValue<bool>();
-        }
-
         static bool Debug()
         {
-            return Menubool("DebugMode");
+            return config.IsBool("DebugMode");
         }
 
         static void Debug(string s)
@@ -816,7 +818,7 @@ namespace ThreshTherulerofthesoul
                 }
             }
 
-            if (!Menubool("AntiRengar"))
+            if (config.IsBool("AntiRengar"))
                 return;
 
             if (!(sender is Obj_AI_Hero))
@@ -867,7 +869,7 @@ namespace ThreshTherulerofthesoul
 
             if (Player.Distance(args.Start) < E.Range && E.IsReady() &&
                     Player.Distance(args.End) > E.Range &&
-                    Menubool("BlockEscapeE"))
+                    config.IsBool("BlockEscapeE"))
             {
                 Debug(args.End);
                 Debug("EscapeE");
