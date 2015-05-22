@@ -57,7 +57,7 @@ namespace ThreshTherulerofthesoul
             E = new Spell(SpellSlot.E, 400);
             R = new Spell(SpellSlot.R, 380);
 
-            Q.SetSkillshot(0.5f, 60f, 1200f, true, SkillshotType.SkillshotLine);
+            Q.SetSkillshot(0.5f, 60f, 1900f, true, SkillshotType.SkillshotLine);
         }
 
         static void LoadMenu()
@@ -79,7 +79,7 @@ namespace ThreshTherulerofthesoul
             {
                 var Qmenu = new Menu("Q", "Q");
                 {
-                    Qmenu.AddItem(new MenuItem("Predict", "Set Predict", true).SetValue(new StringList(new[] { "L#Predict" })));
+                    Qmenu.AddItem(new MenuItem("Predict", "Set Predict", true).SetValue(new StringList(new[] { "L#Predict", "L#Predict2", "Kaiser (Don't Use This is Beta)" })));
                     Qmenu.AddItem(new MenuItem("C-UseQ", "Use Q", true).SetValue(true));
                     combomenu.AddSubMenu(Qmenu);
                 }
@@ -119,6 +119,7 @@ namespace ThreshTherulerofthesoul
                     harassmenu.AddSubMenu(Emenu);
                 }
                 harassmenu.AddItem(new MenuItem("HarassActive", "Harass", true).SetValue(new KeyBind("T".ToCharArray()[0], KeyBindType.Press)));
+                harassmenu.AddItem(new MenuItem("Mana", "ManaManager", true).SetValue(new Slider(30, 0, 100)));
                 config.AddSubMenu(harassmenu);
             }
 
@@ -212,6 +213,10 @@ namespace ThreshTherulerofthesoul
         {
             var target = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
             var Etarget = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Magical);
+            var mana = config.Item("Mana", true).GetValue<Slider>().Value;
+
+            if (Helper.GetManaPer(Player) < mana)
+                return;
 
             if (config.Item("HarassActive", true).GetValue<KeyBind>().Active)
             {
@@ -289,8 +294,29 @@ namespace ThreshTherulerofthesoul
                                 if (b.Hitchance >= HitChance.High &&
                                     Player.Distance(target.ServerPosition) < Q.Range)
                                 {
-                                    Q.Cast(b.CastPosition);
+                                    Q.Cast(target);
                                 }
+                            }
+                            break;
+                        #endregion
+
+                        #region L# Predict2
+                        case 1:
+                            {
+                                if (Player.Distance(target.ServerPosition) < Q.Range)
+                                {
+                                    Q.CastIfHitchanceEquals(target, HitChance.High);
+                                }
+                            }
+                            break;
+                        #endregion
+
+                        #region Kaiser Predict
+                        case 2:
+                            var a = Prediction.GetPredictedPos2(target, Q.Range, Q.Delay, Q.Width, Q.Speed);
+                            if (!a.Item1.IsZero && Q.GetPrediction(target).Hitchance != HitChance.Collision)
+                            {
+                                Q.Cast(a.Item1);
                             }
                             break;
                         #endregion
@@ -482,9 +508,7 @@ namespace ThreshTherulerofthesoul
                 Player.Distance(x.Position) < 1500 && 
                 !x.HasBuff("Recall")))
             {
-                var HpPer = hero.Health / hero.MaxHealth * 100;
-
-                if (HpPer < 25)
+                if (Helper.GetHealthPer(hero) < 25)
                 {
                     if (Player.Distance(hero.Position) <= W.Range)
                     {

@@ -90,5 +90,10 @@ namespace ThreshTherulerofthesoul
         {
             return hero.Health / hero.MaxHealth * 100;
         }
+
+        public static float GetManaPer(Obj_AI_Hero hero)
+        {
+            return hero.Mana / hero.MaxMana * 100;
+        }
     }
 }
