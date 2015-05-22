@@ -60,6 +60,9 @@
   <ItemGroup>
     <Compile Include="EscapeDetector.cs" />
     <Compile Include="Helper.cs" />
+    <Compile Include="Prediction.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="Turret.cs" />

@@ -85,5 +85,10 @@ namespace ThreshTherulerofthesoul
 
             return dmg;
         }
+
+        public static float GetHealthPer(Obj_AI_Hero hero)
+        {
+            return hero.Health / hero.MaxHealth * 100;
+        }
     }
 }

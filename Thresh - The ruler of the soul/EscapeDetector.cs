@@ -45,7 +45,7 @@ namespace ThreshTherulerofthesoul
         {
             #region Spells
 
-            EscapeSpells.Add("summonerflash"); // ALL Champions Flash
+            //EscapeSpells.Add("summonerflash"); // ALL Champions Flash
             EscapeSpells.Add("LucianE"); // Lucian E
             EscapeSpells.Add("KhazixE"); // Khazix E khazixelong
             EscapeSpells.Add("KhazixELong"); // Khazix E Long
@@ -68,10 +68,10 @@ namespace ThreshTherulerofthesoul
             EscapeSpells.Add("VayneQ"); // Vayne Q
             EscapeSpells.Add("ShacoQ"); // shaco Q
 
-            // Leblanc
-            // Shyvana
-            // Ahri
-            // Zac
+            // Leblanc W
+            // Shyvana R
+            // Ahri R 
+            // Zac E
             // Jax Q
             // Ziqs W
             // Kassadin R
