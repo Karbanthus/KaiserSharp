@@ -50,7 +50,7 @@ namespace ThreshTherulerofthesoul
             EscapeSpells.Add("KhazixE"); // Khazix E khazixelong
             EscapeSpells.Add("KhazixELong"); // Khazix E Long
             EscapeSpells.Add("Pounce"); // Nidalee W
-            //EscapeSpells.Add("TristanaW"); // Tristana W
+            EscapeSpells.Add("TristanaW"); // Tristana W
             EscapeSpells.Add("SejuaniArcticAssault"); // Sejuani Q
             EscapeSpells.Add("ShenShadowDash"); // Shen E
             EscapeSpells.Add("AatroxQ"); // Aatorx Q
