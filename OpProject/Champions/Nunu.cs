@@ -42,10 +42,11 @@ namespace OpProject.Champions
             var combomenu = new Menu("Combo", "Combo");
             {
                 combomenu.AddItem(new MenuItem("C-UseQ", "Use Q (If LowHp)", true).SetValue(true));
+                combomenu.AddItem(new MenuItem("QHealth", "Set Q Min health", true).SetValue(new Slider(40, 0, 100)));
                 combomenu.AddItem(new MenuItem("C-UseE", "Use E", true).SetValue(true));
                 combomenu.AddItem(new MenuItem("C-UseW", "Use W", true).SetValue(true));
                 combomenu.AddItem(new MenuItem("C-UseR", "Use R", true).SetValue(true));
-                combomenu.AddItem(new MenuItem("RCount", "Use R", true).SetValue(new Slider(3, 1, 5)));
+                combomenu.AddItem(new MenuItem("RCount", "Use R Min Enemis", true).SetValue(new Slider(3, 1, 5)));
                 config.AddSubMenu(combomenu);
             }
 
@@ -200,8 +201,9 @@ namespace OpProject.Champions
         {
             var minions = MinionManager.GetMinions(500, MinionTypes.All, MinionTeam.Enemy);
             var HealthPer = Player.Health / Player.MaxHealth * 100;
+            var ReqHP = config.Item("QHealth", true).GetValue<Slider>().Value;
 
-            if (minions.Count > 0 && HealthPer < 40)
+            if (minions.Count > 0 && HealthPer < ReqHP)
             {
                 foreach (var minion in minions)
                 {

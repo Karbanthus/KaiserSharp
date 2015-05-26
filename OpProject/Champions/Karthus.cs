@@ -27,7 +27,7 @@ namespace OpProject.Champions
             E = new Spell(SpellSlot.E, 550);
             R = new Spell(SpellSlot.R);
 
-            Q.SetSkillshot(0.66f, 160f, 2000, false, SkillshotType.SkillshotCircle); //160
+            Q.SetSkillshot(0.66f, 160f, float.MaxValue, false, SkillshotType.SkillshotCircle); //160
             W.SetSkillshot(0.65f, 100f, 1600f, false, SkillshotType.SkillshotLine);
 
             QMana = new[] { 20, 20, 26, 32, 38, 44 };
