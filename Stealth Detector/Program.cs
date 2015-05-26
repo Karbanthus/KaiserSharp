@@ -38,6 +38,7 @@ namespace StealthDetector
             SpellList.Add(new Spells { ChampionName = "talon", SpellName = "talonshadowassault", slot = SpellSlot.R }); //Talon R
             SpellList.Add(new Spells { ChampionName = "monkeyking", SpellName = "monkeykingdecoy", slot = SpellSlot.W }); //Wukong W
             SpellList.Add(new Spells { ChampionName = "vayne", SpellName = "vaynetumble", slot = SpellSlot.Q }); //Vayne R-Q
+            SpellList.Add(new Spells { ChampionName = "twitch", SpellName = "hideinshadows", slot = SpellSlot.Q }); //Twitch Q
 
             Menu();
         }
@@ -80,6 +81,11 @@ namespace StealthDetector
                         Detector2.AddItem(new MenuItem("RengarR", "Rengar R").SetValue(true));
                     }
 
+                    if (HeroManager.Enemies.Any(x => x.ChampionName.ToLower() == "leblanc"))
+                    {
+                        Detector2.AddItem(new MenuItem("LeBlancR", "LeBlanc R").SetValue(true));
+                    }
+
                     Detector.AddSubMenu(Detector2);
                 }
 
@@ -110,7 +116,7 @@ namespace StealthDetector
                 if (CheckWard())
                     return;
 
-                if (ObjectManager.Player.Distance(sender.Position) > 700)
+                if (ObjectManager.Player.Distance(sender.Position) > 800)
                     return;
 
                 if (args.SData.Name.ToLower().Contains("vaynetumble") && Game.Time > VayneBuffEndTime)
@@ -130,30 +136,61 @@ namespace StealthDetector
             if (!config.Item("Use").GetValue<KeyBind>().Active && !config.Item("Always").GetValue<bool>())
                 return;
 
+            #region Rengar
+
             var Rengar = HeroManager.Enemies.Find(x => x.ChampionName.ToLower() == "rengar");
 
-            if (Rengar == null)
-                return;
-
-            if (!config.Item("RengarR").GetValue<bool>())
-                return;
-
-            if (ObjectManager.Player.Distance(sender.Position) < 1600)
+            if (Rengar != null)
             {
-                Console.WriteLine("Sender : " + sender.Name);
-            }
+                if (!config.Item("RengarR").GetValue<bool>())
+                    return;
 
-            if (sender.IsEnemy && sender.Name.Contains("Rengar_Base_R_Alert"))
-            {
-                if (ObjectManager.Player.HasBuff("rengarralertsound") &&
-                !CheckWard() &&
-                !Rengar.IsVisible &&
-                !Rengar.IsDead &&
-                    CheckSlot() != SpellSlot.Unknown)
+                if (ObjectManager.Player.Distance(sender.Position) < 1600)
                 {
-                    ObjectManager.Player.Spellbook.CastSpell(CheckSlot(), ObjectManager.Player.Position);
+                    Console.WriteLine("Sender : " + sender.Name);
+                }
+
+                if (sender.IsEnemy && sender.Name.Contains("Rengar_Base_R_Alert"))
+                {
+                    if (ObjectManager.Player.HasBuff("rengarralertsound") &&
+                    !CheckWard() &&
+                    !Rengar.IsVisible &&
+                    !Rengar.IsDead &&
+                        CheckSlot() != SpellSlot.Unknown)
+                    {
+                        ObjectManager.Player.Spellbook.CastSpell(CheckSlot(), ObjectManager.Player.Position);
+                    }
                 }
             }
+
+            #endregion
+
+            #region Leblanc
+
+            var Leblanc = HeroManager.Enemies.Find(x => x.ChampionName.ToLower() == "leblanc");
+
+            if (Leblanc != null)
+            {
+                if (!config.Item("LeBlancR").GetValue<bool>())
+                    return;
+
+                if (ObjectManager.Player.Distance(sender.Position) > 600)
+                    return;
+                
+
+                if (sender.IsEnemy && sender.Name == "LeBlanc_Base_P_poof.troy")
+                {
+                    if (!CheckWard() &&
+                    !Leblanc.IsVisible &&
+                    !Leblanc.IsDead &&
+                        CheckSlot() != SpellSlot.Unknown)
+                    {
+                        ObjectManager.Player.Spellbook.CastSpell(CheckSlot(), ObjectManager.Player.Position);
+                    }
+                }
+            }
+
+            #endregion
         }
 
         static SpellSlot CheckSlot()
