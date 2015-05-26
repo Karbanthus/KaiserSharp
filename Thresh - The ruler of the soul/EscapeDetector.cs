@@ -47,6 +47,8 @@ namespace ThreshTherulerofthesoul
 
             //EscapeSpells.Add("summonerflash"); // ALL Champions Flash
             EscapeSpells.Add("LucianE"); // Lucian E
+            EscapeSpells.Add("LeesinW"); // Leesin W
+            EscapeSpells.Add("BlindMonkQTwo"); // Leesin Q2
             EscapeSpells.Add("KhazixE"); // Khazix E khazixelong
             EscapeSpells.Add("KhazixELong"); // Khazix E Long
             EscapeSpells.Add("Pounce"); // Nidalee W
@@ -56,7 +58,7 @@ namespace ThreshTherulerofthesoul
             EscapeSpells.Add("AatroxQ"); // Aatorx Q
             EscapeSpells.Add("RenektonSliceAndDice"); // Renekton E
             EscapeSpells.Add("GravesMove"); // Graves E
-            //EscapeSpells.Add("JarvanIVDragonStrike"); // Jarvan EQ
+            EscapeSpells.Add("JarvanIVDragonStrike"); // Jarvan EQ
             EscapeSpells.Add("GragasE"); // Gragas E
             EscapeSpells.Add("GnarE"); // Gnar E
             EscapeSpells.Add("ViQ"); // Vi Q

@@ -38,7 +38,7 @@ namespace ThreshTherulerofthesoul
         }
 
         static Orbwalking.Orbwalker Orbwalker;
-        static Menu config;
+        public static Menu config;
         static Spell Q, W, E, R;
         static Obj_AI_Hero catchedUnit = null;
         static int qTimer;
@@ -152,6 +152,8 @@ namespace ThreshTherulerofthesoul
 
                 config.AddSubMenu(Miscmenu);
             }
+
+            Items.LoadItems();
 
             var Drawingmenu = new Menu("Drawings", "Drawings");
             {
@@ -674,7 +676,7 @@ namespace ThreshTherulerofthesoul
             return config.IsBool("DebugMode");
         }
 
-        static void Debug(string s)
+        public static void Debug(string s)
         {
             if (Debug())
             {
