@@ -104,6 +104,9 @@ namespace ThreshTherulerofthesoul
                 }
                 combomenu.AddItem(new MenuItem("ComboActive", "Combo", true).SetValue(new KeyBind(32, KeyBindType.Press)));
                 combomenu.AddItem(new MenuItem("FlayPush", "Flay Push Key", true).SetValue(new KeyBind("H".ToCharArray()[0], KeyBindType.Press)));
+                combomenu.AddItem(new MenuItem("FlayPull", "Flay Pull Key", true).SetValue(new KeyBind("J".ToCharArray()[0], KeyBindType.Press)));
+                combomenu.AddItem(new MenuItem("SafeLanternKey", "Safe Lantern Key", true).SetValue(new KeyBind("U".ToCharArray()[0], KeyBindType.Press)));
+
                 config.AddSubMenu(combomenu);
             }
 
@@ -206,15 +209,26 @@ namespace ThreshTherulerofthesoul
                 }
             }
 
-            if (config.IsBool("Use-SafeLantern"))
-            {
-                SafeLantern();
-            }
-
             if (config.IsActive("FlayPush") && Etarget != null && 
                 E.IsReady())
             {
                 Push(Etarget);
+            }
+
+            if (config.IsActive("FlayPull") && Etarget != null &&
+                E.IsReady())
+            {
+                Pull(Etarget);
+            }
+
+            if (config.IsActive("SafeLanternKey"))
+            {
+                SafeLanternKeybind();
+            }
+
+            if (config.IsBool("Use-SafeLantern"))
+            {
+                SafeLantern();
             }
         }
 
@@ -536,6 +550,47 @@ namespace ThreshTherulerofthesoul
                         CastW(hero.Position);
                     }
                 }
+            }
+        }
+
+        static void SafeLanternKeybind()
+        {
+            Obj_AI_Hero Wtarget = null;
+            float Hp = 0;
+
+            foreach (var hero in ObjectManager.Get<Obj_AI_Hero>()
+                .Where(x => x.IsAlly && !x.IsDead && !x.IsMe &&
+                Player.Distance(x.Position) < 1500 &&
+                !x.HasBuff("Recall")))
+            {
+                var temp = hero.HpPercents();
+
+                if (hero.HasBuffOfType(BuffType.Suppression) ||
+                    hero.HasBuffOfType(BuffType.Taunt) ||
+                    hero.HasBuffOfType(BuffType.Knockup) ||
+                    hero.HasBuffOfType(BuffType.Flee))
+                {
+                    if (Player.Distance(hero.Position) <= W.Range)
+                    {
+                        CastW(hero.Position);
+                    }
+                }
+
+                if (Wtarget == null && Hp == 0)
+                {
+                    Wtarget = hero;
+                    Hp = temp;
+                }
+                else if (temp < Hp)
+                {
+                    Wtarget = hero;
+                    Hp = temp;
+                }
+            }
+
+            if (Wtarget != null)
+            {
+                CastW(Wtarget.Position);
             }
         }
 
