@@ -25,6 +25,12 @@ namespace StealthDetector
             public SpellSlot slot;
         }
 
+        static class SkillData
+        {
+            public static SpellSlot slot;
+            public static float range;
+        }
+
         static void Game_OnGameLoad(EventArgs args)
         {
             Obj_AI_Base.OnCreate += Obj_AI_Base_OnCreate;
@@ -40,6 +46,7 @@ namespace StealthDetector
             SpellList.Add(new Spells { ChampionName = "vayne", SpellName = "vaynetumble", slot = SpellSlot.Q }); //Vayne R-Q
             SpellList.Add(new Spells { ChampionName = "twitch", SpellName = "hideinshadows", slot = SpellSlot.Q }); //Twitch Q
 
+            FuckingRengar();
             Menu();
         }
 
@@ -87,6 +94,16 @@ namespace StealthDetector
                     }
 
                     Detector.AddSubMenu(Detector2);
+                }
+
+                if (HeroManager.Enemies.Any(x => x.ChampionName.ToLower() == "rengar"))
+                {
+                    var FuckingRengar = new Menu("Fucking Rengar", "Fucking Rengar");
+                    {
+                        FuckingRengar.AddItem(new MenuItem("FRUse", "Use Anti Rengar").SetValue(true));
+
+                        Detector.AddSubMenu(FuckingRengar);
+                    }
                 }
 
                 config.AddSubMenu(Detector);
@@ -142,23 +159,38 @@ namespace StealthDetector
 
             if (Rengar != null)
             {
-                if (!config.Item("RengarR").GetValue<bool>())
-                    return;
-
-                if (ObjectManager.Player.Distance(sender.Position) < 1600)
+                if (config.Item("RengarR").GetValue<bool>())
                 {
-                    Console.WriteLine("Sender : " + sender.Name);
+                    if (sender.IsEnemy && sender.Name.Contains("Rengar_Base_R_Alert"))
+                    {
+                        if (ObjectManager.Player.HasBuff("rengarralertsound") &&
+                        !CheckWard() &&
+                        !Rengar.IsVisible &&
+                        !Rengar.IsDead &&
+                            CheckSlot() != SpellSlot.Unknown)
+                        {
+                            ObjectManager.Player.Spellbook.CastSpell(CheckSlot(), ObjectManager.Player.Position);
+                        }
+                    }
                 }
 
-                if (sender.IsEnemy && sender.Name.Contains("Rengar_Base_R_Alert"))
+                var spell = new Spell(SkillData.slot, SkillData.range);
+
+                if (config.Item("FRUse").GetValue<bool>() && SkillData.slot != SpellSlot.Unknown)
                 {
-                    if (ObjectManager.Player.HasBuff("rengarralertsound") &&
-                    !CheckWard() &&
-                    !Rengar.IsVisible &&
-                    !Rengar.IsDead &&
-                        CheckSlot() != SpellSlot.Unknown)
+                    if (sender.IsEnemy && sender.Name.Contains("Rengar_LeapSound.troy") &&
+                        ObjectManager.Player.Distance(sender.Position) < 1700 &&
+                        spell.IsReady())
                     {
-                        ObjectManager.Player.Spellbook.CastSpell(CheckSlot(), ObjectManager.Player.Position);
+                        if (spell.Range == 1 && ObjectManager.Player.Distance(Rengar.Position) < 750)
+                        {
+                            spell.Cast(ObjectManager.Player.Position);
+                        }
+                        else if (ObjectManager.Player.Distance(Rengar.Position) < spell.Range &&
+                            Rengar.IsValidTarget())
+                        {
+                            spell.CastOnUnit(Rengar);
+                        }
                     }
                 }
             }
@@ -191,6 +223,32 @@ namespace StealthDetector
             }
 
             #endregion
+        }
+
+        static void FuckingRengar()
+        {
+            switch (ObjectManager.Player.ChampionName)
+            {
+                case "Jinx":
+                    SkillData.slot = SpellSlot.E;
+                    SkillData.range = 1;
+                    break;
+                case "Vayne":
+                    SkillData.slot = SpellSlot.E;
+                    SkillData.range = 700;
+                    break;
+                case "Viktor":
+                    SkillData.slot = SpellSlot.W;
+                    SkillData.range = 1;
+                    break;
+                case "Tristana":
+                    SkillData.slot = SpellSlot.R;
+                    SkillData.range = 550;
+                    break;
+                default:
+                    SkillData.slot = SpellSlot.Unknown;
+                    break;
+            }
         }
 
         static SpellSlot CheckSlot()
