@@ -124,8 +124,10 @@ namespace OriannaTheruleroftheBall
                     Wmenu.AddItem(new MenuItem("H-UseW", "Use W", true).SetValue(true));
                     harassmenu.AddSubMenu(Wmenu);
                 }
-                harassmenu.AddItem(new MenuItem("HMana", "ManaManager", true).SetValue(new Slider(30, 0, 100)));
+
                 harassmenu.AddItem(new MenuItem("HarassActive", "Harass", true).SetValue(new KeyBind("T".ToCharArray()[0], KeyBindType.Press)));
+                harassmenu.AddItem(new MenuItem("HarassToggle", "Harass Toggle", true).SetValue(new KeyBind("U".ToCharArray()[0], KeyBindType.Toggle)));
+                harassmenu.AddItem(new MenuItem("HMana", "ManaManager", true).SetValue(new Slider(30, 0, 100)));
                 config.AddSubMenu(harassmenu);
             } 
             #endregion
@@ -158,9 +160,9 @@ namespace OriannaTheruleroftheBall
                     FarmMenu.AddSubMenu(LaneClearMenu);
                 }
 
-                FarmMenu.AddItem(new MenuItem("FMana", "ManaManager", true).SetValue(new Slider(0, 0, 100)));
                 FarmMenu.AddItem(new MenuItem("LastHitActive", "LastHit", true).SetValue(new KeyBind("Z".ToCharArray()[0], KeyBindType.Press)));
                 FarmMenu.AddItem(new MenuItem("LaneClearActive", "LaneClear", true).SetValue(new KeyBind("C".ToCharArray()[0], KeyBindType.Press)));
+                FarmMenu.AddItem(new MenuItem("FMana", "ManaManager", true).SetValue(new Slider(0, 0, 100)));
                 config.AddSubMenu(FarmMenu);
             }
             #endregion
@@ -773,7 +775,7 @@ namespace OriannaTheruleroftheBall
             {
                 Combo();
             }
-            if (config.IsActive("HarassActive") && config.GetValue("HMana") < Player.ManaPercents())
+            if ((config.IsActive("HarassActive") || config.IsActive("HarassToggle")) && config.GetValue("HMana") < Player.ManaPercents())
             {
                 Harass();
             }

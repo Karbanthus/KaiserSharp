@@ -37,6 +37,17 @@ namespace OriannaTheruleroftheBall
 
             #endregion
 
+            #region Gragas
+
+            InitiatorList.Add(new Initiatorinfo
+            {
+                Hero = "Gragas",
+                Spell = "Gragas-E",
+                Spelldata = "gragase"
+            });
+
+            #endregion
+
             #region Hecarim
 
             InitiatorList.Add(new Initiatorinfo
