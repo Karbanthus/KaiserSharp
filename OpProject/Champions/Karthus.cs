@@ -27,7 +27,7 @@ namespace OpProject.Champions
             E = new Spell(SpellSlot.E, 550);
             R = new Spell(SpellSlot.R);
 
-            Q.SetSkillshot(0.66f, 160f, float.MaxValue, false, SkillshotType.SkillshotCircle); //160
+            Q.SetSkillshot(0.66f, 160f, 2000, false, SkillshotType.SkillshotCircle); //160
             W.SetSkillshot(0.65f, 100f, 1600f, false, SkillshotType.SkillshotLine);
 
             QMana = new[] { 20, 20, 26, 32, 38, 44 };
@@ -200,7 +200,7 @@ namespace OpProject.Champions
                     b.Add(x.Position.To2D());
                 }
                 var predict = MinionManager.GetBestCircularFarmLocation(b, Q.Width, Q.Range);
-
+                
                 if (predict.Position.IsValid() && config.Item("LC-UseQ", true).GetValue<bool>() && Q.IsReady())
                 {
                     Q.Cast(predict.Position);
@@ -431,7 +431,7 @@ namespace OpProject.Champions
             {
                 Render.Circle.DrawCircle(ObjectManager.Player.Position, E.Range, ECircle.Color);
             }
-            
+
             RKillable();
         }
 
