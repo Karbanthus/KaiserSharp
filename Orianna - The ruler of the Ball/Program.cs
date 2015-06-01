@@ -33,6 +33,7 @@ namespace OriannaTheruleroftheBall
             BallManager.BallManagerInit();
             Spellbook.OnCastSpell += Spellbook_OnCastSpell;
             Obj_AI_Base.OnProcessSpellCast += Obj_AI_Base_OnProcessSpellCast;
+            Interrupter2.OnInterruptableTarget += Interrupter2_OnInterruptableTarget;
         }
 
         static Orbwalking.Orbwalker Orbwalker;
@@ -198,6 +199,7 @@ namespace OriannaTheruleroftheBall
             var Miscmenu = new Menu("Misc", "Misc");
             {
                 Miscmenu.AddItem(new MenuItem("BlockR", "Use Block R (no Enemy)", true).SetValue(true));
+                Miscmenu.AddItem(new MenuItem("Inter-UseR", "Use Interrupt R", true).SetValue(true));
                 Miscmenu.AddItem(new MenuItem("DebugMode", "Debug Mode", true).SetValue(false));
 
                 config.AddSubMenu(Miscmenu);
@@ -807,6 +809,20 @@ namespace OriannaTheruleroftheBall
                 if (E.IsReady() && Player.Distance(sender.ServerPosition) < E.Range)
                 {
                     E.CastOnUnit(sender);
+                }
+            }
+        }
+
+        static void Interrupter2_OnInterruptableTarget(Obj_AI_Hero sender, Interrupter2.InterruptableTargetEventArgs args)
+        {
+            if (!config.IsBool("Inter-UseR") || !R.IsReady())
+                return;
+
+            if (sender.IsEnemy && args.DangerLevel == Interrupter2.DangerLevel.High)
+            {
+                if (BallManager.Ball.Position.Distance(sender.ServerPosition) < R.Range)
+                {
+                    R.Cast();
                 }
             }
         }
