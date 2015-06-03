@@ -98,8 +98,11 @@ namespace OriannaTheruleroftheBall
                 }
                 var Rmenu = new Menu("R", "R");
                 {
-                    Rmenu.AddItem(new MenuItem("C-UseR", "Use Auto R", true).SetValue(true));
-                    Rmenu.AddItem(new MenuItem("RminNoEnemies", "Min No. Of Enemies R", true).SetValue(new Slider(2, 1, 5)));
+                    Rmenu.AddItem(new MenuItem("C-UseR", "Use R (Combo Mode)", true).SetValue(true));
+                    Rmenu.AddItem(new MenuItem("RminNoEnemies", "Min No. Of Enemies R (Combo Mode)", true).SetValue(new Slider(2, 1, 5)));
+                    Rmenu.AddItem(new MenuItem("AutoR", "Use R (Any Time)", true).SetValue(true));
+                    Rmenu.AddItem(new MenuItem("AutoRminNoEnemies", "Min No. Of Enemies R (Any Time)", true).SetValue(new Slider(3, 1, 5)));
+
                     combomenu.AddSubMenu(Rmenu);
                 }
                 var SummonerSpellsmenu = new Menu("Summoner Spells", "Summoner Spells");
@@ -128,7 +131,7 @@ namespace OriannaTheruleroftheBall
 
                 harassmenu.AddItem(new MenuItem("HarassActive", "Harass", true).SetValue(new KeyBind("T".ToCharArray()[0], KeyBindType.Press)));
                 harassmenu.AddItem(new MenuItem("HarassToggle", "Harass Toggle", true).SetValue(new KeyBind("U".ToCharArray()[0], KeyBindType.Toggle)));
-                harassmenu.AddItem(new MenuItem("HMana", "ManaManager", true).SetValue(new Slider(30, 0, 100)));
+                harassmenu.AddItem(new MenuItem("HMana", "Harass ManaManager", true).SetValue(new Slider(30, 0, 100)));
                 config.AddSubMenu(harassmenu);
             } 
             #endregion
@@ -163,7 +166,7 @@ namespace OriannaTheruleroftheBall
 
                 FarmMenu.AddItem(new MenuItem("LastHitActive", "LastHit", true).SetValue(new KeyBind("Z".ToCharArray()[0], KeyBindType.Press)));
                 FarmMenu.AddItem(new MenuItem("LaneClearActive", "LaneClear", true).SetValue(new KeyBind("C".ToCharArray()[0], KeyBindType.Press)));
-                FarmMenu.AddItem(new MenuItem("FMana", "ManaManager", true).SetValue(new Slider(0, 0, 100)));
+                FarmMenu.AddItem(new MenuItem("FMana", "Farm ManaManager", true).SetValue(new Slider(0, 0, 100)));
                 config.AddSubMenu(FarmMenu);
             }
             #endregion
@@ -324,6 +327,9 @@ namespace OriannaTheruleroftheBall
 
         static void Farm()
         {
+            if (BallManager.Ball.IsMoving)
+                return;
+
             if (config.IsActive("LastHitActive"))
             {
                 if (config.IsBool("LH-UseQ") && Q.IsReady())
@@ -707,6 +713,22 @@ namespace OriannaTheruleroftheBall
             }
         }
 
+        static void AutoR()
+        {
+            if (BallManager.Ball.IsMoving)
+                return;
+
+            var ReqCount = config.GetValue("AutoRminNoEnemies");
+
+            if (HeroManager.Enemies
+                .Where(x =>
+                    x.IsValidTarget() &&
+                    BallManager.Ball.Position.Distance(x.ServerPosition) < R.Width).Count() >= ReqCount)
+            {
+                R.Cast();
+            }
+        }
+
         #endregion
 
         #region Others
@@ -792,6 +814,10 @@ namespace OriannaTheruleroftheBall
             if (config.IsBool("AutoW") && W.IsReady())
             {
                 AutoW();
+            }
+            if (config.IsBool("AutoR") && R.IsReady())
+            {
+                AutoR();
             }
         }
 
