@@ -62,7 +62,6 @@
     <Compile Include="Extensions.cs" />
     <Compile Include="Helper.cs" />
     <Compile Include="Items.cs" />
-    <Compile Include="Prediction.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="Turret.cs" />

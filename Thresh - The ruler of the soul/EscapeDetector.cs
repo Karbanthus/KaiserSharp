@@ -69,15 +69,15 @@ namespace ThreshTherulerofthesoul
 
             EscapeSpells.Add("VayneQ"); // Vayne Q
             EscapeSpells.Add("ShacoQ"); // shaco Q
+            EscapeSpells.Add("CayitlynE"); // Cayitlyn E
+            EscapeSpells.Add("ZacE"); // Zac E
+            EscapeSpells.Add("ShyvanaR"); // Shyvana R
 
             // Leblanc W
-            // Shyvana R
             // Ahri R 
-            // Zac E
             // Jax Q
             // Ziqs W
             // Kassadin R
-            // Cayitlyn E
             // Queen
             // Hecarim R
 

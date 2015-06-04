@@ -79,7 +79,7 @@ namespace ThreshTherulerofthesoul
             {
                 var Qmenu = new Menu("Q", "Q");
                 {
-                    Qmenu.AddItem(new MenuItem("Predict", "Set Predict", true).SetValue(new StringList(new[] { "L#Predict", "L#Predict2", "Kaiser (Don't Use This is Beta)" })));
+                    Qmenu.AddItem(new MenuItem("Predict", "Set Predict", true).SetValue(new StringList(new[] { "L#Predict", "L#Predict2" }, 1)));
                     Qmenu.AddItem(new MenuItem("C-UseQ", "Use Q", true).SetValue(true));
                     combomenu.AddSubMenu(Qmenu);
                 }
@@ -168,6 +168,29 @@ namespace ThreshTherulerofthesoul
 
                 config.AddSubMenu(Drawingmenu);
             }
+            config.AddItem(new MenuItem("PermaShow", "PermaShow", true).SetShared().SetValue(true)).ValueChanged += (s, args) => {
+                if (args.GetNewValue<bool>())
+                {
+                    config.Item("ComboActive", true).Permashow(true, "Combo", SharpDX.Color.Aqua);
+                    config.Item("HarassActive", true).Permashow(true, "Harass", SharpDX.Color.Aqua);
+                    config.Item("FlayPush", true).Permashow(true, "E Push", SharpDX.Color.AntiqueWhite);
+                    config.Item("FlayPull", true).Permashow(true, "E Pull", SharpDX.Color.AntiqueWhite);
+                    config.Item("SafeLanternKey", true).Permashow(true, "Safe Lantern", SharpDX.Color.Aquamarine);
+                }
+                else
+                {
+                    config.Item("ComboActive", true).Permashow(false, "Combo");
+                    config.Item("HarassActive", true).Permashow(false, "Harass");
+                    config.Item("FlayPush", true).Permashow(false, "E Push");
+                    config.Item("FlayPull", true).Permashow(false, "E Pull");
+                    config.Item("SafeLanternKey", true).Permashow(false, "Safe Lantern");
+                }
+            };
+            config.Item("ComboActive", true).Permashow(config.IsBool("PermaShow"), "Combo", SharpDX.Color.Aqua);
+            config.Item("HarassActive", true).Permashow(config.IsBool("PermaShow"), "Harass", SharpDX.Color.Aqua);
+            config.Item("FlayPush", true).Permashow(config.IsBool("PermaShow"), "E Push", SharpDX.Color.AntiqueWhite);
+            config.Item("FlayPull", true).Permashow(config.IsBool("PermaShow"), "E Pull", SharpDX.Color.AntiqueWhite);
+            config.Item("SafeLanternKey", true).Permashow(config.IsBool("PermaShow"), "Safe Lantern", SharpDX.Color.Aquamarine);
 
             config.AddToMainMenu();
         }
@@ -330,16 +353,6 @@ namespace ThreshTherulerofthesoul
                                 {
                                     Q.CastIfHitchanceEquals(target, HitChance.High);
                                 }
-                            }
-                            break;
-                        #endregion
-
-                        #region Kaiser Predict
-                        case 2:
-                            var a = Prediction.GetPredictedPos2(target, Q.Range, Q.Delay, Q.Width, Q.Speed);
-                            if (!a.Item1.IsZero && Q.GetPrediction(target).Hitchance != HitChance.Collision)
-                            {
-                                Q.Cast(a.Item1);
                             }
                             break;
                         #endregion
