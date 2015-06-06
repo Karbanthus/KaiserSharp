@@ -36,7 +36,7 @@ namespace ThreshTherulerofthesoul
             Obj_AI_Base.OnPlayAnimation += Obj_AI_Base_OnPlayAnimation;
             EscapeBlocker.OnDetectEscape += EscapeBlocker_OnDetectEscape;
         }
-
+        
         static Orbwalking.Orbwalker Orbwalker;
         public static Menu config;
         static Spell Q, W, E, R;
@@ -81,6 +81,7 @@ namespace ThreshTherulerofthesoul
                 {
                     Qmenu.AddItem(new MenuItem("Predict", "Set Predict", true).SetValue(new StringList(new[] { "L#Predict", "L#Predict2" }, 1)));
                     Qmenu.AddItem(new MenuItem("C-UseQ", "Use Q", true).SetValue(true));
+                    Qmenu.AddItem(new MenuItem("C-UseQ2", "Use Q2 AutoMatical", true).SetValue(true));
                     combomenu.AddSubMenu(Qmenu);
                 }
                 var Wmenu = new Menu("W", "W");
@@ -359,7 +360,7 @@ namespace ThreshTherulerofthesoul
                     }
                 }
             }
-            else if (Catched && Environment.TickCount > qTimer - 200 && CastQ2() && CatchedQtarget.Type == GameObjectType.obj_AI_Hero)
+            else if (Catched && Environment.TickCount > qTimer - 200 && CastQ2() && CatchedQtarget.Type == GameObjectType.obj_AI_Hero && config.IsBool("C-UseQ2"))
             {
                 Q.Cast();
             }
