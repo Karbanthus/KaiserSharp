@@ -111,6 +111,7 @@ namespace OriannaTheruleroftheBall
                     combomenu.AddSubMenu(SummonerSpellsmenu);
                 }
                 combomenu.AddItem(new MenuItem("ComboActive", "Combo", true).SetValue(new KeyBind(32, KeyBindType.Press)));
+                combomenu.AddItem(new MenuItem("BurstActive", "Burst Combo", true).SetValue(new KeyBind("J".ToCharArray()[0], KeyBindType.Press)));
                 config.AddSubMenu(combomenu);
             }
             #endregion
@@ -239,6 +240,33 @@ namespace OriannaTheruleroftheBall
             } 
             #endregion
 
+            #region PermaShow
+            config.AddItem(new MenuItem("PermaShow", "PermaShow", true).SetShared().SetValue(true)).ValueChanged += (s, args) =>
+            {
+                if (args.GetNewValue<bool>())
+                {
+                    config.Item("ComboActive", true).Permashow(true, "Combo", SharpDX.Color.Aqua);
+                    config.Item("BurstActive", true).Permashow(true, "Burst", SharpDX.Color.Aqua);
+                    config.Item("HarassActive", true).Permashow(true, "Harass", SharpDX.Color.Aqua);
+                    config.Item("LastHitActive", true).Permashow(true, "LastHit", SharpDX.Color.AntiqueWhite);
+                    config.Item("LaneClearActive", true).Permashow(true, "LaneClear", SharpDX.Color.AntiqueWhite);
+                }
+                else
+                {
+                    config.Item("ComboActive", true).Permashow(false, "Combo");
+                    config.Item("BurstActive", true).Permashow(false, "Burst");
+                    config.Item("HarassActive", true).Permashow(false, "Harass");
+                    config.Item("LastHitActive", true).Permashow(false, "LastHit");
+                    config.Item("LaneClearActive", true).Permashow(false, "LaneClear");
+                }
+            };
+            config.Item("ComboActive", true).Permashow(config.IsBool("PermaShow"), "Combo", SharpDX.Color.Aqua);
+            config.Item("BurstActive", true).Permashow(config.IsBool("PermaShow"), "Burst", SharpDX.Color.Aqua);
+            config.Item("HarassActive", true).Permashow(config.IsBool("PermaShow"), "Harass", SharpDX.Color.AntiqueWhite);
+            config.Item("LastHitActive", true).Permashow(config.IsBool("PermaShow"), "LastHit", SharpDX.Color.AntiqueWhite);
+            config.Item("LaneClearActive", true).Permashow(config.IsBool("PermaShow"), "LaneClear", SharpDX.Color.Aquamarine);
+            #endregion
+
             config.AddToMainMenu();
         }
 
@@ -277,6 +305,34 @@ namespace OriannaTheruleroftheBall
                     CastR();
                 }
                 KSCheck(target);
+            }
+        }
+
+        static void BurstCombo()
+        {
+            var target = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
+
+            if (target != null)
+            {
+                if (IgniteSlot != SpellSlot.Unknown && IgniteSlot.IsReady() && config.IsBool("C-UseIgnite"))
+                {
+                    Ignite();
+                }
+                if (Q.IsReady())
+                {
+                    CastQ(target);
+                }
+                if (W.IsReady())
+                {
+                    CastW(target);
+                }
+                if (R.IsReady() && !BallManager.Ball.IsMoving)
+                {
+                    if (BallManager.Ball.Position.Distance(target.ServerPosition) < R.Width)
+                    {
+                        R.Cast();
+                    }
+                }
             }
         }
 
@@ -729,6 +785,17 @@ namespace OriannaTheruleroftheBall
             }
         }
 
+        static void ManualR(Obj_AI_Hero target)
+        {
+            if (BallManager.Ball.IsMoving)
+                return;
+
+            if (BallManager.Ball.Position.Distance(target.ServerPosition) < R.Width)
+            {
+                R.Cast();
+            }
+        }
+
         #endregion
 
         #region Others
@@ -798,6 +865,10 @@ namespace OriannaTheruleroftheBall
             if (config.IsActive("ComboActive"))
             {
                 Combo();
+            }
+            if (config.IsActive("BurstActive"))
+            {
+                BurstCombo();
             }
             if ((config.IsActive("HarassActive") || config.IsActive("HarassToggle")) && config.GetValue("HMana") < Player.ManaPercents())
             {
