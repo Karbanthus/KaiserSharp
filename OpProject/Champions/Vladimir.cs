@@ -134,9 +134,6 @@ namespace OpProject.Champions
             var Qtarget = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
             var Etarget = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Magical);
 
-            var CanCastQ = Q.GetPrediction(Qtarget).Hitchance >= HitChance.High ? true : false;
-            var CanCastE = E.GetPrediction(Etarget, true).Hitchance >= HitChance.High ? true : false;
-
             var useQ = config.Item("C-UseQ", true).GetValue<bool>();
             var useW = config.Item("C-UseW", true).GetValue<bool>();
             var useE = config.Item("C-UseE", true).GetValue<bool>();
@@ -146,13 +143,13 @@ namespace OpProject.Champions
             if (useR && R.IsReady())
             {
                 UltCheck();
-                if (useE && CanCastE)
+                if (useE && Etarget != null)
                 {
                     E.Cast();
                 }
-                if (useQ && CanCastQ)
+                if (useQ && Qtarget != null)
                 {
-                    Q.Cast(Qtarget);
+                    Q.CastOnUnit(Qtarget);
                 }
                 if (useW)
                 {
@@ -161,13 +158,13 @@ namespace OpProject.Champions
             }
             else
             {
-                if (useE && CanCastE)
+                if (useE && Etarget != null)
                 {
                     E.Cast();
                 }
-                if (useQ && CanCastQ)
+                if (useQ && Qtarget != null)
                 {
-                    Q.Cast(Qtarget);
+                    Q.CastOnUnit(Qtarget);
                 }
                 if (useW)
                 {
@@ -180,19 +177,15 @@ namespace OpProject.Champions
         {
             var Qtarget = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
             var Etarget = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Magical);
-
-            var CanCastQ = Q.GetPrediction(Qtarget).Hitchance >= HitChance.High ? true : false;
-            var CanCastE = E.GetPrediction(Etarget, true).Hitchance >= HitChance.High ? true : false;
-
             var useQ = config.Item("H-UseQ", true).GetValue<bool>();
             var useE = config.Item("H-UseE", true).GetValue<bool>();
 
-            if (useQ && CanCastQ)
+            if (useQ && Qtarget != null)
             {
-                Q.Cast();
+                Q.CastOnUnit(Qtarget);
             }
 
-            if (useE && CanCastE)
+            if (useE && Etarget != null)
             {
                 E.Cast();
             }
